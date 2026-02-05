@@ -4,6 +4,8 @@ import mapboxStyles from 'mapbox-gl/dist/mapbox-gl.css?inline';
 import geocoderStyles from '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css?inline';
 import globalStyles from './styles/global.scss?inline';
 
+// Note we only use this file for our JS bundle
+
 // Inject mapbox styles
 const mapboxStyleTag = document.createElement('style');
 mapboxStyleTag.textContent = mapboxStyles;

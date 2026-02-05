@@ -4,14 +4,6 @@ import { determineParkingValidity } from './determine-parking-validity';
 import { getCurbPoliciesById } from './get-curb-policies-by-id';
 import { loadingState } from '../state.svelte';
 
-// https://smart-curb-api-726931983438.us-east4.run.app/curbs/zones?min_lat=42.34778270782263&min_lng=-71.06194793559055&max_lat=42.34851779803651&max_lng=-71.06320923102157&include_geometry=true
-
-// Select area params
-// min_lng
-// min_lat
-// max_lng
-// max_lat
-
 const transformData = async (data, policies, day, time) => {
 	if (!data.data) return null;
 	let { zones } = data.data;
@@ -65,11 +57,6 @@ const getCurbZonesByArea = async (min_lng, min_lat, max_lng, max_lat, day, time)
 	return transformedResult;
 };
 
-// Radius
-// radius
-// lng
-// lat
-
 const getCurbZonesByRadius = async (lng, lat, radius, day, time) => {
 	loadingState.loading = true;
 
@@ -119,9 +106,5 @@ const getCurbZonesByRadius = async (lng, lat, radius, day, time) => {
 
 	return transformedResult;
 };
-
-// Alternative
-// include_geometry: false
-// time: 1765498738000
 
 export { getCurbZonesByArea, getCurbZonesByRadius };

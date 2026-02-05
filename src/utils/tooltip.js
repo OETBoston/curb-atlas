@@ -22,7 +22,7 @@ export function tooltip(node, content) {
 		// Position the tooltip
 		cleanup = autoUpdate(node, tooltipNode, () => {
 			computePosition(node, tooltipNode, {
-				placement: 'top', // or 'bottom', 'left', 'right'
+				placement: 'top',
 				middleware: [offset(8), flip(), shift()]
 			}).then(({ x, y }) => {
 				Object.assign(tooltipNode.style, {

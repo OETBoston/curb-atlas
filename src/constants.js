@@ -7,15 +7,10 @@ export const CURB_ZONE_MINZOOM = 13;
 
 export const TIMEOUT = 250;
 
-// Boston
+// Boston bounds
 export const maxBounds = [
 	-71.21060396634394, 42.23174784259396, -70.7944899306811, 42.55900946262469
 ];
-
-// Chinatown
-// export const maxBounds = [
-// 	-71.07365299438388, 42.340870752393556, -71.05159019487846, 42.35695482226521
-// ];
 
 export const initialFilterState = [
 	{

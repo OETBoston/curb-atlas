@@ -16,31 +16,6 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 		maxStay: null
 	};
 
-	// ------------------------------------------------------------------------------------------
-	// let values = policies
-	// 	.map((p) => {
-	// 		return p?.rules?.map((r) => r?.user_classes);
-	// 	})
-	// 	.flat(Infinity);
-	// values = [...new Set(values)].filter((v) => v !== null && v !== undefined);
-	// if (values.length) {
-	// 	console.log(values);
-	// }
-	// ------------------------------------------------------------------------------------------
-
-	// Conflict
-	// 2fe6d0cd-d29b-58f7-8696-b9ac9fd80507
-
-	// Many policies
-	// c2693bd0-5916-5446-861b-a8f5a59bccb1
-
-	// Priority confusion?
-	// a0c33b87-26ab-5632-9f42-75c4068e8898
-
-	// if (curb_zone_id === 'a0c33b87-26ab-5632-9f42-75c4068e8898') {
-	// 	console.log(policies);
-	// }
-
 	// Sort by priority order
 	const sortedPolicies = policies.sort((a, b) => a.priority - b.priority);
 
