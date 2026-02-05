@@ -258,13 +258,9 @@
 		mapState.map = new mapboxgl.Map({
 			attributionControl: false,
 			container: 'map',
-			style: 'mapbox://styles/oetboston/cmla1zirs007d01st6h9kg2ij', // mapbox-light-v10 with some slight modifications
+			style: 'mapbox://styles/oetboston/cmla1zirs007d01st6h9kg2ij',
 			center: mapState.position.center,
 			zoom: mapState.position.zoom,
-			// center: [-71.049873, 42.34125],
-			// zoom: 17,
-			// center: [-71.063179, 42.349644],
-			// zoom: 16,
 			maxBounds: [maxBounds.slice(0, 2), maxBounds.slice(2)],
 			maxZoom: 17
 		});
