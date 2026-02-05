@@ -16,7 +16,7 @@ export const simplifyFilters = (filters) => {
 	return next;
 };
 
-// day/time utils
+// Day/time utils
 export const dayToFullDay = (abbrev) => {
 	const legend = {
 		sun: 'Sunday',

@@ -225,12 +225,6 @@
 	.top-bar {
 	}
 
-	// .sidebar-container {
-	// 	height: 100%;
-	// 	width: 330px;
-	// 	flex-shrink: 0;
-	// }
-
 	.map-container {
 		flex-grow: 1;
 		position: relative;

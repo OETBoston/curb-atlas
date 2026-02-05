@@ -608,13 +608,12 @@
 		}
 	};
 
-	// REACT TO CHANGING STATES ----------------------------------------------------------------------
+	// REACT TO CHANGING STATES
 	// type = area
 	$effect(() => {
-		// TRIGGERS
 		selectedAreaState.type;
 		selectedAreaState.selected;
-		// Using this fn stops reactivity
+		// Triggers placed above because using this fn stops reactivity
 		const fn = () => {
 			const existingSource = mapState.map.getSource(SELECTED_SOURCE_ID);
 			if (!!selectedAreaState.selected && selectedAreaState.type === 'area' && !existingSource) {
@@ -652,10 +651,9 @@
 
 	// type = radius
 	$effect(() => {
-		// TRIGGERS
 		selectedAreaState.type;
 		selectedAreaState.selected;
-		// Using this fn stops reactivity
+		// Triggers placed above because using this fn stops reactivity
 		const fn = () => {
 			// Add layer
 			const existingSource = mapState.map.getSource(SELECTED_SOURCE_ID);
@@ -737,8 +735,6 @@
 			);
 		}
 	});
-
-	// ------------------------------------------------------------------------------------------------
 
 	// Remove layer
 	$effect(() => {

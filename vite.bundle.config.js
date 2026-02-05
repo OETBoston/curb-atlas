@@ -26,12 +26,11 @@ export default defineConfig({
 			fileName: 'bundle',
 			formats: ['iife']
 		},
-		cssCodeSplit: false, // Add this
+		cssCodeSplit: false,
 		rollupOptions: {
 			output: {
 				inlineDynamicImports: true,
 				assetFileNames: (assetInfo) => {
-					// Prevent CSS extraction
 					if (assetInfo.name === 'style.css') return 'style.css';
 					return assetInfo.name;
 				}
