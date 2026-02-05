@@ -1,0 +1,45 @@
+:root {
+	// COLORS
+	// Primary
+	--charles-blue: #091f2f;
+	--charles-blue-80: #091f2fcc;
+	--charles-blue-40: #091f2f66;
+	--optimistic-blue: #1871bd;
+	--freedom-trail-red: #fb4d42;
+	// Support colors
+	--support-blue-4: #061622;
+	--support-blue-3: #0c2639;
+	--support-blue-2: #45789c;
+	--support-blue-1: #51acff;
+
+	--support-gray-4: #58585b;
+	--support-gray-3: #d2d2d2;
+	--support-gray-2: #e0e0e0;
+	--support-gray-1: #f2f2f2;
+	// Hover colors
+	--optimistic-blue-hover: #1461a5;
+	--support-gray-1-hover: var(--support-gray-2);
+
+	--white: #ffffff;
+
+	// FONTS
+	--primary-font: 'Montserrat';
+	--secondary-font: 'Lora';
+
+	// 24px
+	--font-size-xl: 1.5rem;
+	// 18px
+	--font-size-l: 1.125rem;
+	// 16px
+	--font-size-m: 1rem;
+	// 14px
+	--font-size-ms: 0.875rem;
+	// 10px
+	--font-size-s: 0.625rem;
+
+	--font-weight-light: 300;
+	--font-weight-regular: 400;
+	--font-weight-medium: 500;
+	--font-weight-semi-bold: 600;
+	--font-weight-bold: 700;
+}
