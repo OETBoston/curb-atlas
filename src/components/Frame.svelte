@@ -85,14 +85,15 @@
 				<button class="info-modal-backdrop" onclick={() => (infoModalOpen = false)}></button>
 				<div class="info-modal" role="dialog">
 					<button class="close-button" onclick={() => (infoModalOpen = false)}><Close /></button>
-					<div class="info-modal-title">Welcome to Boston’s Curb Atlas</div>
+					<div class="info-modal-title">Welcome to the Boston Curb Atlas Chinatown Preview</div>
 					<div class="info-modal-body">
-						Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-						incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-						exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-						dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-						Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-						mollit anim id est laborum.
+						We're building a real-time tool to help Bostonians explore and understand curb regulations across the city, and we need your help to get it right. This prototype covers Chinatown, with more neighborhoods coming soon. Your input will directly shape how we improve and expand the tool.
+						<br /><br />
+						The data you see may be incomplete, outdated, or inaccurate. <strong>This tool is for informational purposes only and does not constitute official City of Boston guidance on parking or curb regulations.</strong> Always refer to posted signage when making parking decisions.
+						<br /><br />
+						Dive in — search for addresses, try the filters, and let us know what works and what doesn't. Have a use case you think this tool could help solve? We want to hear about that too.
+						<br /><br />
+						We're eager to answer your questions or feedback - please reach out to us at <strong><a href="mailto:oet@boston.gov">oet@boston.gov</a></strong>.
 					</div>
 					<div class="info-modal-logo-container">
 						<div class="info-modal-logo">
