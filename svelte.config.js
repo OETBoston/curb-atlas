@@ -8,7 +8,7 @@ const config = {
 			fallback: 'index.html'
 		}),
 		paths: {
-			base: process.env.BASE_PATH ?? '',
+			base: '/curb-atlas',
 			relative: false
 		}
 	},
