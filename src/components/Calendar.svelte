@@ -2,7 +2,7 @@
 	import { calendarizePolicies } from '../utils/calendarize-policies';
 	import { timeState } from '../state.svelte';
 	import Dropdown from './Dropdown.svelte';
-	import { dayOfWeekOptions, timeOptions } from '../constants';
+	import { dayOfWeekOptions, timeOptions, colors } from '../constants';
 
 	const { policies, setHighlightedPolicyId } = $props();
 
@@ -58,13 +58,13 @@
 	const getBackgroundColor = (activity) => {
 		switch (activity) {
 			case 'parking': {
-				return '#51ACFF';
+				return colors.parkingAllowed;
 			}
 			case 'loading': {
-				return '#9013FE';
+				return colors.loading;
 			}
 			default: {
-				return '#f58433';
+				return colors.parkingNotAllowed;
 			}
 		}
 	};
