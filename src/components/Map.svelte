@@ -46,29 +46,64 @@
 	const filters = $derived(simplifyFilters(filterState.current));
 
 	const parkingExpression = $derived.by(() => {
-		const { permitted, accessible, loadingZone } = filters;
+		const { paid, permitted, accessible, loadingZone } = filters;
 
 		let nestedCondition = [
 			'case',
+			[
+				'all',
+				['has', 'permitted'],
+				['==', ['get', 'permitted'], true],
+				['has', 'paid'],
+				['==', ['get', 'paid'], true]
+			],
+			colors.parkingAllowedPermittedPaid,
 			['all', ['has', 'permitted'], ['==', ['get', 'permitted'], true]],
 			colors.parkingAllowedPermitted,
+			['all', ['has', 'paid'], ['==', ['get', 'paid'], true]],
+			colors.parkingAllowedPaid,
 			colors.parkingAllowed
 		];
 		let nestedConditionLightened = [
 			'case',
+			[
+				'all',
+				['has', 'permitted'],
+				['==', ['get', 'permitted'], true],
+				['has', 'paid'],
+				['==', ['get', 'paid'], true]
+			],
+			colors.parkingAllowedPermittedPaidLight,
 			['all', ['has', 'permitted'], ['==', ['get', 'permitted'], true]],
 			colors.parkingAllowedPermittedLight,
+			['all', ['has', 'paid'], ['==', ['get', 'paid'], true]],
+			colors.parkingAllowedPaidLight,
 			colors.parkingAllowedLight
 		];
+
 		let fallback = colors.parkingNotAllowed;
+
 		let condition = [
 			'all',
 			['to-boolean', ['get', 'canPark']],
-			['!', ['to-boolean', ['get', 'permitted']]]
+			['!', ['to-boolean', ['get', 'permitted']]],
+			['!', ['to-boolean', ['get', 'paid']]]
 		];
 
-		if (permitted) {
+		if (permitted && paid) {
 			condition = ['to-boolean', ['get', 'canPark']];
+		} else if (permitted) {
+			condition = [
+				'all',
+				['to-boolean', ['get', 'canPark']],
+				['!', ['to-boolean', ['get', 'paid']]]
+			];
+		} else if (paid) {
+			condition = [
+				'all',
+				['to-boolean', ['get', 'canPark']],
+				['!', ['to-boolean', ['get', 'permitted']]]
+			];
 		}
 
 		// If both, accessible gets priority
