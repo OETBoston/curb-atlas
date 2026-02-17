@@ -13,7 +13,8 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 		accessible: false,
 		loadingZone: false,
 		// maxStay in minutes
-		maxStay: null
+		maxStay: null,
+		paid: false
 	};
 
 	// Sort by priority order
@@ -31,7 +32,8 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 				purposes = [],
 				user_classes = [],
 				max_stay,
-				max_stay_unit
+				max_stay_unit,
+				rate = null
 			} = rule ?? {};
 
 			// Gross data fixing
@@ -104,6 +106,10 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 						// If the unit is 'hour', multiple by 60 to get minutes
 						let maxStay = max_stay_unit === 'hour' ? max_stay * 60 : max_stay;
 						properties.maxStay = maxStay;
+					}
+					// Check for paid parking
+					if (properties.canPark && rate) {
+						properties.paid = true;
 					}
 				} // No parking
 				else {

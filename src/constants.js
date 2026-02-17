@@ -22,6 +22,12 @@ export const initialFilterState = [
 				id: 'permitted',
 				value: false,
 				type: 'checkbox'
+			},
+			{
+				label: 'Include spots requiring payment',
+				id: 'paid',
+				value: false,
+				type: 'checkbox'
 			}
 		]
 	},
@@ -109,9 +115,15 @@ export const timeOptions = [
 
 export const colors = {
 	parkingAllowed: '#51ACFF', // Support blue 1
-	parkingAllowedPermitted: '#216CFF', // Support blue 1
+	parkingAllowedPermitted: '#216CFF', // Darkened upport blue 1
+	parkingAllowedPaid: '#216CFF', // Currently same as permitted
+	// Unsure if we want to combine
+	parkingAllowedPermittedPaid: '#216CFF', // Currently same as permitted
 	parkingAllowedLight: '#99ceff', // lightened support blue 1
 	parkingAllowedPermittedLight: '#699eff', // lightened support blue 1
+	parkingAllowedPaidLight: '#699eff', // Currently same as permitted
+	// Unsure if we want to combine
+	parkingAllowedPermittedPaidLight: '#699eff', // Currently same as permitted
 	//freedomTrailRed: '#FB4D42', //<- Freedom Trail Red
 	parkingNotAllowed: '#f58433',
 	parkingNotAllowedLight: '#f9b685',
