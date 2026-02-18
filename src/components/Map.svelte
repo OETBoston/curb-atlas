@@ -3,7 +3,7 @@
 	import throttle from 'lodash.throttle';
 	import mapboxgl from 'mapbox-gl';
 	import 'mapbox-gl/dist/mapbox-gl.css';
-	import { mapboxAccessToken, maxBounds, widths, colors, CURB_ZONE_MINZOOM, TIMEOUT } from '../constants';
+	import { mapboxAccessToken, maxBounds, dasharrays, widths, colors, CURB_ZONE_MINZOOM, TIMEOUT } from '../constants';
 	import { simplifyFilters } from '../utils/basic-utils';
 	import {
 		geocoderState,
@@ -198,11 +198,24 @@
 			'case',
 			condition,
 			widths.curbZoneWidth,
-			widths.unavailableCurbZoneWidth
+			widths.notAllowedCurbZoneWidth
 		];
 	});
 
-	const parkingExpression = $derived.by(() => {
+	const parkingLineDasharrayExpression = $derived.by(() => {
+		const { paid, permitted } = filters;
+
+		let condition = generateCanParkCondition(permitted, paid);
+
+		return [
+			'case',
+			condition,
+			dasharrays.curbZoneDasharray, // solid line
+			dasharrays.notAllowedCurbZoneDasharray // dotted line
+		];
+	});
+
+	const parkingLineColorExpression = $derived.by(() => {
 		const { paid, permitted, accessible, loadingZone } = filters;
 
 		let nestedCondition = generateNestedCondition(
@@ -642,8 +655,9 @@
 					filter: curbFilter,
 					layout: curbLayout,
 					paint: {
-						'line-color': parkingExpression,
+						'line-color': parkingLineColorExpression,
 						'line-width': parkingLineWidthExpression,
+						'line-dasharray': parkingLineDasharrayExpression,
 					}
 				};
 
@@ -764,7 +778,7 @@
 					paint: {
 						'line-color': '#58585b',
 						'line-width': widths.areaSelectionOutline,
-						'line-dasharray': [2, 2]
+						'line-dasharray': dasharrays.areaSelectionDasharray
 					}
 				};
 
@@ -840,8 +854,9 @@
 	// filters
 	$effect(() => {
 		if (filters && mapState.map.getLayer(CURB_ZONES_LAYER_ID)) {
-			mapState.map.setPaintProperty(CURB_ZONES_LAYER_ID, 'line-color', parkingExpression);
+			mapState.map.setPaintProperty(CURB_ZONES_LAYER_ID, 'line-color', parkingLineColorExpression);
 			mapState.map.setPaintProperty(CURB_ZONES_LAYER_ID, 'line-width', parkingLineWidthExpression);
+			mapState.map.setPaintProperty(CURB_ZONES_LAYER_ID, 'line-dasharray', parkingLineDasharrayExpression);
 		}
 		if (filters && mapState.map.getLayer(CURB_ZONES_EMPHASIS_OUTLINE_LAYER_ID)) {
 			mapState.map.setPaintProperty(

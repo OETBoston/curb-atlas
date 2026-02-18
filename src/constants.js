@@ -113,9 +113,15 @@ export const timeOptions = [
 	{ label: '12:00 AM', value: 24, hide: true }
 ];
 
+export const dasharrays = {
+	curbZoneDasharray: [1, 0], // solid line
+	notAllowedCurbZoneDasharray: [0.5, 2], // dotted line
+	areaSelectionDasharray: [2, 2],
+};
+
 export const widths = {
 	curbZoneWidth: 5,
-	unavailableCurbZoneWidth: 3,
+	notAllowedCurbZoneWidth: 3,
 	selectedCurbZoneStroke: 8,
 	selectedCurbZoneWidth: 4,
 	curbZoneEmphasisOutline: 12,
@@ -135,8 +141,10 @@ export const colors = {
 	// Unsure if we want to combine
 	parkingAllowedPermittedPaidLight: '#699eff', // Currently same as permitted
 	//freedomTrailRed: '#FB4D42', //<- Freedom Trail Red
-	parkingNotAllowed: '#f9b685', //'#f58433',
-	parkingNotAllowedLight: '#fcd9c0', //'#f9b685',
+	parkingNotAllowed: '#f58433',
+	parkingNotAllowedLight: '#f9b685',
+	//parkingNotAllowed: '#f9b685', //'#f58433',
+	//parkingNotAllowedLight: '#fcd9c0', //'#f9b685',
 	loading: '#e22214',
 	accessible: '#1871BD', // Optimistic Blue
 	loadingIconFill: 'hsl(359, 95%, 75%)',
