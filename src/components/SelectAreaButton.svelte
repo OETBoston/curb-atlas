@@ -10,12 +10,16 @@
 	};
 
 	const startDraw = () => {
+		if (selectedAreaState?.selected) return;
 		buttonActive = true;
 		mapState.isDrawing = true;
-		mapState.draw.changeMode('draw_rectangle');
+		mapState.map.dragPan.disable();
+		mapState.draw.changeMode('draw_drag_rectangle');
 		mapState.map.on('draw.create', (v) => {
 			updateArea(v);
 			mapState.isDrawing = false;
+			mapState.map.dragPan.enable();
+
 			// Delete because we will use the bounding box to draw something to the map
 			const data = mapState.draw.deleteAll();
 		});

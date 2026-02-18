@@ -21,6 +21,76 @@
 	import NoZonesModal from './NoZonesModal.svelte';
 	import * as turf from '@turf/turf';
 
+	// ------------------------------------------------------------
+	// Custom draw mode allowing the drag functionality
+	const DragRectangleMode = {
+		onSetup() {
+			return {
+				start: null,
+				rectangle: null
+			};
+		},
+
+		onMouseDown(state, e) {
+			state.start = e.lngLat;
+
+			state.rectangle = this.newFeature({
+				type: 'Feature',
+				properties: {},
+				geometry: {
+					type: 'Polygon',
+					coordinates: [
+						[
+							[0, 0],
+							[0, 0],
+							[0, 0],
+							[0, 0],
+							[0, 0]
+						]
+					]
+				}
+			});
+
+			this.addFeature(state.rectangle);
+		},
+
+		onDrag(state, e) {
+			if (!state.start || !state.rectangle) return;
+
+			const start = state.start;
+			const end = e.lngLat;
+
+			if (!end) return;
+
+			const bbox = [
+				[start.lng, start.lat],
+				[end.lng, start.lat],
+				[end.lng, end.lat],
+				[start.lng, end.lat],
+				[start.lng, start.lat]
+			];
+
+			if (bbox.some((coord) => coord.includes(undefined))) return;
+
+			state.rectangle.setCoordinates([bbox]);
+		},
+
+		onMouseUp(state) {
+			if (!state.rectangle) return;
+
+			this.map.fire('draw.create', {
+				features: [state.rectangle.toGeoJSON()]
+			});
+
+			this.changeMode('simple_select');
+		},
+
+		toDisplayFeatures(state, geojson, display) {
+			display(geojson);
+		}
+	};
+	// ------------------------------------------------------------
+
 	let showNoZoneWarning = $state(false);
 
 	const TIMEOUT_TIME = 150;
@@ -324,11 +394,20 @@
 
 		modes.draw_rectangle = DrawRectangle;
 
+		modes.draw_drag_rectangle = DragRectangleMode;
+
 		mapState.draw = new MapboxDraw({ modes });
 
 		mapState.map.addControl(mapState.draw, 'top-left');
 
 		mapState.map.on('move', throttledSetPositionState);
+
+		mapState.map.on('load', () => {
+			mapState.map.dragRotate.disable();
+			mapState.map.touchZoomRotate.disableRotation();
+			mapState.map.touchPitch.disable();
+			mapState.map.keyboard.disable();
+		});
 	});
 
 	const SELECTED_SOURCE_ID = '_selectedarea';
