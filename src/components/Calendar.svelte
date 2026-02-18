@@ -1,9 +1,9 @@
 <script>
-	import { onMount } from 'svelte';
 	import { calendarizePolicies } from '../utils/calendarize-policies';
 	import { timeState } from '../state.svelte';
 	import Dropdown from './Dropdown.svelte';
 	import { dayOfWeekOptions, timeOptions, colors } from '../constants';
+	import { onMount } from 'svelte';
 
 	const { policies, setHighlightedPolicyId } = $props();
 
@@ -85,7 +85,7 @@
 
 	$effect(() => {
 		// Scroll to 9-5 to start
-		if (policies) {
+		if (calendar && policies) {
 			const nineAmEl = document.getElementById('9:00 AM');
 			nineAmEl.scrollIntoView();
 		}

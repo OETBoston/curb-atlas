@@ -3,7 +3,7 @@
 	import { calendarizePolicies } from '../utils/calendarize-policies';
 	import Calendar from './Calendar.svelte';
 
-	const { policies } = $props();
+	const { curbZoneId, policies } = $props();
 
 	let highlightedPolicyId = $state(null);
 
@@ -67,9 +67,13 @@
 		{/each}
 	</ul>
 
-	<div class="title">Calendar</div>
+	{#key curbZoneId}
+		{#if policies && policies.length}
+			<div class="title">Calendar</div>
 
-	<Calendar {policies} {setHighlightedPolicyId} />
+			<Calendar {policies} {setHighlightedPolicyId} />
+		{/if}
+	{/key}
 </div>
 
 <style lang="scss">

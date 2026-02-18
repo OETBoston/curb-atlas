@@ -10,6 +10,7 @@
 	const policies = $derived(selectedCurbZoneState.policies);
 	const geometry = $derived(selectedCurbZoneState.geometry);
 	const properties = $derived(selectedCurbZoneState.properties);
+	let curbZoneId = $derived(properties?.curb_zone_id);
 
 	let activeTab = $state('policies');
 
@@ -52,7 +53,7 @@
 		>
 	</div>
 	{#if activeTab === 'policies'}
-		<Policies {policies} />
+		<Policies {policies} {curbZoneId} />
 	{:else}
 		<AdditionalInfo {properties} />
 	{/if}
