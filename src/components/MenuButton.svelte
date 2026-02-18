@@ -5,7 +5,7 @@
 </script>
 
 <div class="button-container" style="--button-height: {buttonHeight}px">
-	{#if children}
+	{#if open && children}
 		<div
 			role="menu"
 			class={['menu-container', { right: position === 'right', open, light: theme === 'light' }]}
