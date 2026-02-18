@@ -1,10 +1,14 @@
 <script>
+	import { onMount } from 'svelte';
 	import { calendarizePolicies } from '../utils/calendarize-policies';
 	import { timeState } from '../state.svelte';
 	import Dropdown from './Dropdown.svelte';
 	import { dayOfWeekOptions, timeOptions, colors } from '../constants';
 
 	const { policies, setHighlightedPolicyId } = $props();
+
+	const MIN_TIME = 0;
+	const MAX_TIME = 24;
 
 	const calendarized = $derived(calendarizePolicies(policies));
 
@@ -34,23 +38,26 @@
 	let timeSlotHeight = $state(0);
 
 	const calculateHeight = (start, end) => {
-		let height = (end - start) * 2;
+		let cappedStart = Math.max(MIN_TIME, start);
+		let cappedEnd = Math.min(MAX_TIME, end);
+		let height = (cappedEnd - cappedStart) * 2;
 		return height * timeSlotHeight;
 	};
 
 	const calculateVerticalOffset = (start) => {
-		let height = start * 2;
+		let cappedStart = Math.max(MIN_TIME, start) - MIN_TIME;
+		let height = cappedStart * 2;
 		return height * timeSlotHeight + timeSlotHeight / 2;
 	};
 
 	let timeSlotWidth = $state(0);
 
 	const calculateWidth = (numEvents) => {
-		return timeSlotWidth / numEvents;
+		return timeSlotWidth / numEvents - 1;
 	};
 
 	const calculateHorizontalOffset = (numEvents, i) => {
-		let width = calculateWidth(numEvents);
+		let width = calculateWidth(numEvents) + 1;
 		return width * i;
 	};
 
@@ -68,6 +75,21 @@
 			}
 		}
 	};
+
+	const nineToFiveTimeOptions = $derived.by(() => {
+		let nextTimeOptions = timeOptions.filter((t) => {
+			return t.value >= MIN_TIME && t.value <= MAX_TIME;
+		});
+		return nextTimeOptions;
+	});
+
+	$effect(() => {
+		// Scroll to 9-5 to start
+		if (policies) {
+			const nineAmEl = document.getElementById('9:00 AM');
+			nineAmEl.scrollIntoView();
+		}
+	});
 </script>
 
 <div class="Calendar">
@@ -80,8 +102,12 @@
 		<div class="calendar-container">
 			<div class="calendar-container-inner">
 				<div class="time-sidebar">
-					{#each timeOptions as time}
-						<div class={['time', { hide: time?.hide }]} bind:clientHeight={timeSlotHeight}>
+					{#each nineToFiveTimeOptions as time}
+						<div
+							id={`${time.label}`}
+							class={['time', { hide: time?.hide || Math.round(time.value) !== time.value }]}
+							bind:clientHeight={timeSlotHeight}
+						>
 							{time.label}
 						</div>
 					{/each}
@@ -125,7 +151,7 @@
 
 	.calendar-container {
 		display: flex;
-		max-height: 300px;
+		max-height: 306px;
 		overflow: auto;
 
 		&-inner {
@@ -144,7 +170,7 @@
 	}
 
 	.time {
-		padding: 0.5rem;
+		padding: 0rem;
 		color: var(--charles-blue);
 		font-family: var(--primary-font);
 		font-size: var(--font-size-ms);

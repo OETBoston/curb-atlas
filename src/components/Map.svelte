@@ -21,6 +21,76 @@
 	import NoZonesModal from './NoZonesModal.svelte';
 	import * as turf from '@turf/turf';
 
+	// ------------------------------------------------------------
+	// Custom draw mode allowing the drag functionality
+	const DragRectangleMode = {
+		onSetup() {
+			return {
+				start: null,
+				rectangle: null
+			};
+		},
+
+		onMouseDown(state, e) {
+			state.start = e.lngLat;
+
+			state.rectangle = this.newFeature({
+				type: 'Feature',
+				properties: {},
+				geometry: {
+					type: 'Polygon',
+					coordinates: [
+						[
+							[0, 0],
+							[0, 0],
+							[0, 0],
+							[0, 0],
+							[0, 0]
+						]
+					]
+				}
+			});
+
+			this.addFeature(state.rectangle);
+		},
+
+		onDrag(state, e) {
+			if (!state.start || !state.rectangle) return;
+
+			const start = state.start;
+			const end = e.lngLat;
+
+			if (!end) return;
+
+			const bbox = [
+				[start.lng, start.lat],
+				[end.lng, start.lat],
+				[end.lng, end.lat],
+				[start.lng, end.lat],
+				[start.lng, start.lat]
+			];
+
+			if (bbox.some((coord) => coord.includes(undefined))) return;
+
+			state.rectangle.setCoordinates([bbox]);
+		},
+
+		onMouseUp(state) {
+			if (!state.rectangle) return;
+
+			this.map.fire('draw.create', {
+				features: [state.rectangle.toGeoJSON()]
+			});
+
+			this.changeMode('simple_select');
+		},
+
+		toDisplayFeatures(state, geojson, display) {
+			display(geojson);
+		}
+	};
+	// ------------------------------------------------------------
+
 	let showNoZoneWarning = $state(false);
 
 	const TIMEOUT_TIME = 150;
@@ -35,6 +105,8 @@
 	mapboxgl.accessToken = mapboxAccessToken;
 
 	let marker = $state(null);
+
+	let hoveredCurbId = $state(null);
 
 	const curbLayout = {
 		'line-join': 'round',
@@ -135,7 +207,14 @@
 			fallback = colors.parkingNotAllowedLight;
 		}
 
-		return ['case', condition, nestedCondition, fallback];
+		return [
+			'case',
+			['boolean', ['feature-state', 'hover'], false],
+			colors.hoverHighlightColor,
+			condition,
+			nestedCondition,
+			fallback
+		];
 	});
 
 	const parkingEmphasisOutlineExpression = $derived.by(() => {
@@ -204,7 +283,12 @@
 			];
 		}
 
-		return condition;
+		return [
+			'case',
+			['boolean', ['feature-state', 'hover'], false],
+			colors.hoverHighlightColor,
+			condition
+		];
 	});
 
 	const parkingSymbolExpression = $derived.by(() => {
@@ -310,11 +394,20 @@
 
 		modes.draw_rectangle = DrawRectangle;
 
+		modes.draw_drag_rectangle = DragRectangleMode;
+
 		mapState.draw = new MapboxDraw({ modes });
 
 		mapState.map.addControl(mapState.draw, 'top-left');
 
 		mapState.map.on('move', throttledSetPositionState);
+
+		mapState.map.on('load', () => {
+			mapState.map.dragRotate.disable();
+			mapState.map.touchZoomRotate.disableRotation();
+			mapState.map.touchPitch.disable();
+			mapState.map.keyboard.disable();
+		});
 	});
 
 	const SELECTED_SOURCE_ID = '_selectedarea';
@@ -460,6 +553,25 @@
 		}
 	};
 
+	const addHoverState = (layerId, sourceId) => {
+		mapState.map.on('mouseenter', layerId, (e) => {
+			if (e.features.length > 0) {
+				if (hoveredCurbId !== null) {
+					mapState.map.setFeatureState({ source: sourceId, id: hoveredCurbId }, { hover: false });
+				}
+				hoveredCurbId = e.features[0].id;
+				mapState.map.setFeatureState({ source: sourceId, id: hoveredCurbId }, { hover: true });
+			}
+		});
+
+		mapState.map.on('mouseleave', layerId, () => {
+			if (hoveredCurbId !== null) {
+				mapState.map.setFeatureState({ source: sourceId, id: hoveredCurbId }, { hover: false });
+			}
+			hoveredCurbId = null;
+		});
+	};
+
 	const addCurbZonesLayers = async (type, day, time) => {
 		let fetchFn = null;
 
@@ -533,7 +645,8 @@
 
 			const nextSource = {
 				type: 'geojson',
-				data: nextData
+				data: nextData,
+				generateId: true
 			};
 
 			const existingSource = mapState.map.getSource(CURB_ZONES_SOURCE_ID);
@@ -584,6 +697,8 @@
 				};
 
 				mapState.map.addLayer(emphasisLayer);
+
+				addHoverState(CURB_ZONES_EMPHASIS_LAYER_ID, CURB_ZONES_SOURCE_ID);
 
 				const symbolLayer = {
 					id: CURB_ZONES_SYMBOL_LAYER_ID,

@@ -1,4 +1,5 @@
 <script>
+	import { untrack } from 'svelte';
 	import Map from './Map.svelte';
 	import TopBar from './TopBar.svelte';
 	import MenuButton from './MenuButton.svelte';
@@ -36,6 +37,18 @@
 			})
 		);
 	};
+
+	$effect(() => {
+		if (hasPolicies) {
+			untrack(() => {
+				openMenus.policies = true;
+			});
+		} else {
+			untrack(() => {
+				openMenus.policies = false;
+			});
+		}
+	});
 </script>
 
 <div class="Frame">
@@ -87,13 +100,23 @@
 					<button class="close-button" onclick={() => (infoModalOpen = false)}><Close /></button>
 					<div class="info-modal-title">Welcome to the Boston Curb Atlas Chinatown Preview</div>
 					<div class="info-modal-body">
-						We're building a real-time tool to help Bostonians explore and understand curb regulations across the city, and we need your help to get it right. This prototype covers Chinatown, with more neighborhoods coming soon. Your input will directly shape how we improve and expand the tool.
+						We're building a real-time tool to help Bostonians explore and understand curb
+						regulations across the city, and we need your help to get it right. This prototype
+						covers Chinatown, with more neighborhoods coming soon. Your input will directly shape
+						how we improve and expand the tool.
 						<br /><br />
-						The data you see may be incomplete, outdated, or inaccurate. <strong>This tool is for informational purposes only and does not constitute official City of Boston guidance on parking or curb regulations.</strong> Always refer to posted signage when making parking decisions.
+						The data you see may be incomplete, outdated, or inaccurate.
+						<strong
+							>This tool is for informational purposes only and does not constitute official City of
+							Boston guidance on parking or curb regulations.</strong
+						>
+						Always refer to posted signage when making parking decisions.
 						<br /><br />
-						Dive in — search for addresses, try the filters, and let us know what works and what doesn't. Have a use case you think this tool could help solve? We want to hear about that too.
+						Dive in — search for addresses, try the filters, and let us know what works and what doesn't.
+						Have a use case you think this tool could help solve? We want to hear about that too.
 						<br /><br />
-						We're eager to answer your questions or feedback - please reach out to us at <strong><a href="mailto:oet@boston.gov">oet@boston.gov</a></strong>.
+						We're eager to answer your questions or feedback - please reach out to us at
+						<strong><a href="mailto:oet@boston.gov">oet@boston.gov</a></strong>.
 					</div>
 					<div class="info-modal-logo-container">
 						<div class="info-modal-logo">

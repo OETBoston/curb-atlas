@@ -37,7 +37,7 @@ export let selectedCurbZoneState = $state({
 export let timeState = $state({
 	day: 'mon',
 	time: 9,
-	useCurrentTime: false
+	useCurrentTime: true
 });
 
 export let loadingState = $state({

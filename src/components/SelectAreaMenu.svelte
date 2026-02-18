@@ -6,10 +6,12 @@
 	import SelectAreaButton from './SelectAreaButton.svelte';
 	import SelectRadiusButton from './SelectRadiusButton.svelte';
 	import RemoveSelectionButton from './RemoveSelectionButton.svelte';
-	import { selectedAreaState } from '../state.svelte';
+	import { selectedAreaState, geocoderState } from '../state.svelte';
 	import Legend from './Legend.svelte';
 
 	const MINUTES_PER_MILE = 20;
+
+	const hasResult = $derived(!!geocoderState?.results);
 
 	const radius = $derived(selectedAreaState?.radius ? Number(selectedAreaState?.radius) : null);
 	const walkEstimate = $derived(radius ? radius * MINUTES_PER_MILE : 0);
@@ -30,7 +32,9 @@
 			<RemoveSelectionButton />
 		</div>
 		<div class="select-area-buttons">
-			<SelectRadiusButton />
+			{#if hasResult}
+				<SelectRadiusButton />
+			{/if}
 			<SelectAreaButton />
 		</div>
 	</div>

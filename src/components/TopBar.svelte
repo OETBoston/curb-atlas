@@ -5,7 +5,7 @@
 </script>
 
 <div class="TopBar">
-	<div class="boston-app-title">Boston Curb Atlas</div>
+	<div class="boston-app-title">Boston Curb Map (Beta)</div>
 	<div class="right-container">
 		<button class="info-button" onclick={onClickInfo}>info</button>
 		<div class="boston-logo">
