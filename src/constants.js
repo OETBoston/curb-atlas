@@ -135,8 +135,8 @@ export const colors = {
 	// Unsure if we want to combine
 	parkingAllowedPermittedPaidLight: '#699eff', // Currently same as permitted
 	//freedomTrailRed: '#FB4D42', //<- Freedom Trail Red
-	parkingNotAllowed: '#f58433',
-	parkingNotAllowedLight: '#f9b685',
+	parkingNotAllowed: '#f9b685', //'#f58433',
+	parkingNotAllowedLight: '#fcd9c0', //'#f9b685',
 	loading: '#e22214',
 	accessible: '#1871BD', // Optimistic Blue
 	loadingIconFill: 'hsl(359, 95%, 75%)',
