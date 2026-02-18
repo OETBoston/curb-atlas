@@ -117,7 +117,7 @@
 
 	const filters = $derived(simplifyFilters(filterState.current));
 
-	const generateNestedCondition = (bothColor, permittedColor, paidColor, defaultColor) => [
+	const generateNestedCondition = (bothResult, permittedResult, paidResult, defaultResult) => [
 			'case',
 			[
 				'all',
@@ -126,13 +126,43 @@
 				['has', 'paid'],
 				['==', ['get', 'paid'], true]
 			],
-			bothColor,
+			bothResult,
 			['all', ['has', 'permitted'], ['==', ['get', 'permitted'], true]],
-			permittedColor,
+			permittedResult,
 			['all', ['has', 'paid'], ['==', ['get', 'paid'], true]],
-			paidColor,
-			defaultColor
+			paidResult,
+			defaultResult
 		];
+
+	const generateOuterNestedCondition = (isLoadingZone, isAccessible, loadingResult, accessibleResult, nestedCondition) => {
+		// If both, accessible gets priority
+		if (isLoadingZone && isAccessible) {
+			return [
+				'case',
+				['to-boolean', ['get', 'accessible']],
+				accessibleResult,
+				['to-boolean', ['get', 'loadingZone']],
+				loadingResult,
+				nestedCondition
+			];
+		} else if (isAccessible) {
+			return [
+				'case',
+				['to-boolean', ['get', 'accessible']],
+				accessibleResult,
+				nestedCondition
+			];
+		} else if (isLoadingZone) {
+			return [
+				'case',
+				['to-boolean', ['get', 'loadingZone']],
+				loadingResult,
+				nestedCondition
+			];
+		} else {
+			return nestedCondition;
+		}
+	};
 
 	const parkingExpression = $derived.by(() => {
 		const { paid, permitted, accessible, loadingZone } = filters;
@@ -176,34 +206,16 @@
 			];
 		}
 
-		// If both, accessible gets priority
-		if (loadingZone && accessible) {
-			nestedCondition = [
-				'case',
-				['to-boolean', ['get', 'accessible']],
-				colors.accessible,
-				['to-boolean', ['get', 'loadingZone']],
+		if (loadingZone || accessible) {
+			nestedCondition = generateOuterNestedCondition(
+				loadingZone,
+				accessible,
 				colors.loading,
-				nestedConditionLightened
-			];
-			fallback = colors.parkingNotAllowedLight;
-		} else if (accessible) {
-			nestedCondition = [
-				'case',
-				['to-boolean', ['get', 'accessible']],
 				colors.accessible,
 				nestedConditionLightened
-			];
+			);
 			fallback = colors.parkingNotAllowedLight;
-		} else if (loadingZone) {
-			nestedCondition = [
-				'case',
-				['to-boolean', ['get', 'loadingZone']],
-				colors.loading,
-				nestedConditionLightened
-			];
-			fallback = colors.parkingNotAllowedLight;
-		}
+		}	
 
 		return [
 			'case',
@@ -216,81 +228,34 @@
 	});
 
 	const parkingEmphasisOutlineExpression = $derived.by(() => {
-		const { permitted, accessible, loadingZone } = filters;
-		let nestedConditionLightened = 'transparent';
-		let condition = nestedConditionLightened;
+		const { accessible, loadingZone } = filters;
+		let condition = 'transparent';
 		let outlineColor = '#ffffff';
 
-		// If both, accessible gets priority
-		if (loadingZone && accessible) {
-			condition = [
-				'case',
-				['to-boolean', ['get', 'accessible']],
-				outlineColor,
-				['to-boolean', ['get', 'loadingZone']],
-				outlineColor,
-				nestedConditionLightened
-			];
-		} else if (accessible) {
-			condition = [
-				'case',
-				['to-boolean', ['get', 'accessible']],
-				outlineColor,
-				nestedConditionLightened
-			];
-		} else if (loadingZone) {
-			condition = [
-				'case',
-				['to-boolean', ['get', 'loadingZone']],
-				outlineColor,
-				nestedConditionLightened
-			];
-		}
-
-		return condition;
+		return generateOuterNestedCondition(
+			loadingZone,
+			accessible,
+			outlineColor,
+			outlineColor,
+			condition
+		);
 	});
 
 	const parkingEmphasisExpression = $derived.by(() => {
-		const { permitted, accessible, loadingZone } = filters;
-		let nestedConditionLightened = 'transparent';
-		let condition = nestedConditionLightened;
+		const { accessible, loadingZone } = filters;
+		let condition = 'transparent';
 
-		// If both, accessible gets priority
-		if (loadingZone && accessible) {
-			condition = [
-				'case',
-				['to-boolean', ['get', 'accessible']],
-				colors.accessible,
-				['to-boolean', ['get', 'loadingZone']],
-				colors.loading,
-				nestedConditionLightened
-			];
-		} else if (accessible) {
-			condition = [
-				'case',
-				['to-boolean', ['get', 'accessible']],
-				colors.accessible,
-				nestedConditionLightened
-			];
-		} else if (loadingZone) {
-			condition = [
-				'case',
-				['to-boolean', ['get', 'loadingZone']],
-				colors.loading,
-				nestedConditionLightened
-			];
-		}
-
-		return [
-			'case',
-			['boolean', ['feature-state', 'hover'], false],
-			colors.hoverHighlightColor,
+		return generateOuterNestedCondition(
+			loadingZone,
+			accessible,
+			colors.loading,
+			colors.accessible,
 			condition
-		];
+		);
 	});
 
 	const parkingSymbolExpression = $derived.by(() => {
-		const { permitted, accessible, loadingZone } = filters;
+		const { accessible, loadingZone } = filters;
 		let condition = 'none'; // default no symbol
 
 		// If both, accessible gets priority
@@ -347,7 +312,7 @@
 	});
 
 	const parkingSymbolFilter = $derived.by(() => {
-		const { permitted, accessible, loadingZone } = filters;
+		const { accessible, loadingZone } = filters;
 		let condition = false;
 
 		if (loadingZone && accessible) {
