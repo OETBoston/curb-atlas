@@ -164,6 +164,44 @@
 		}
 	};
 
+	const generateCanParkCondition = (permitted, paid) => {
+		if (permitted && paid) {
+			return ['to-boolean', ['get', 'canPark']];
+		} else if (permitted) {
+			return [
+				'all',
+				['to-boolean', ['get', 'canPark']],
+				['!', ['to-boolean', ['get', 'paid']]]
+			];
+		} else if (paid) {
+			return [
+				'all',
+				['to-boolean', ['get', 'canPark']],
+				['!', ['to-boolean', ['get', 'permitted']]]
+			];
+		} else {
+			return [
+				'all',
+				['to-boolean', ['get', 'canPark']],
+				['!', ['to-boolean', ['get', 'permitted']]],
+				['!', ['to-boolean', ['get', 'paid']]]
+			];
+		}
+	};
+
+	const parkingLineWidthExpression = $derived.by(() => {
+		const { paid, permitted } = filters;
+
+		let condition = generateCanParkCondition(permitted, paid);
+
+		return [
+			'case',
+			condition,
+			widths.curbZoneWidth,
+			widths.unavailableCurbZoneWidth
+		];
+	});
+
 	const parkingExpression = $derived.by(() => {
 		const { paid, permitted, accessible, loadingZone } = filters;
 
@@ -183,28 +221,7 @@
 
 		let fallback = colors.parkingNotAllowed;
 
-		let condition = [
-			'all',
-			['to-boolean', ['get', 'canPark']],
-			['!', ['to-boolean', ['get', 'permitted']]],
-			['!', ['to-boolean', ['get', 'paid']]]
-		];
-
-		if (permitted && paid) {
-			condition = ['to-boolean', ['get', 'canPark']];
-		} else if (permitted) {
-			condition = [
-				'all',
-				['to-boolean', ['get', 'canPark']],
-				['!', ['to-boolean', ['get', 'paid']]]
-			];
-		} else if (paid) {
-			condition = [
-				'all',
-				['to-boolean', ['get', 'canPark']],
-				['!', ['to-boolean', ['get', 'permitted']]]
-			];
-		}
+		let condition = generateCanParkCondition(permitted, paid);
 
 		if (loadingZone || accessible) {
 			nestedCondition = generateOuterNestedCondition(
@@ -626,7 +643,7 @@
 					layout: curbLayout,
 					paint: {
 						'line-color': parkingExpression,
-						'line-width': widths.curbZoneWidth
+						'line-width': parkingLineWidthExpression,
 					}
 				};
 
@@ -824,6 +841,7 @@
 	$effect(() => {
 		if (filters && mapState.map.getLayer(CURB_ZONES_LAYER_ID)) {
 			mapState.map.setPaintProperty(CURB_ZONES_LAYER_ID, 'line-color', parkingExpression);
+			mapState.map.setPaintProperty(CURB_ZONES_LAYER_ID, 'line-width', parkingLineWidthExpression);
 		}
 		if (filters && mapState.map.getLayer(CURB_ZONES_EMPHASIS_OUTLINE_LAYER_ID)) {
 			mapState.map.setPaintProperty(
