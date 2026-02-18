@@ -3,7 +3,7 @@
 	import throttle from 'lodash.throttle';
 	import mapboxgl from 'mapbox-gl';
 	import 'mapbox-gl/dist/mapbox-gl.css';
-	import { mapboxAccessToken, maxBounds, colors, CURB_ZONE_MINZOOM, TIMEOUT } from '../constants';
+	import { mapboxAccessToken, maxBounds, widths, colors, CURB_ZONE_MINZOOM, TIMEOUT } from '../constants';
 	import { simplifyFilters } from '../utils/basic-utils';
 	import {
 		geocoderState,
@@ -117,41 +117,39 @@
 
 	const filters = $derived(simplifyFilters(filterState.current));
 
+	const generateNestedCondition = (bothColor, permittedColor, paidColor, defaultColor) => [
+			'case',
+			[
+				'all',
+				['has', 'permitted'],
+				['==', ['get', 'permitted'], true],
+				['has', 'paid'],
+				['==', ['get', 'paid'], true]
+			],
+			bothColor,
+			['all', ['has', 'permitted'], ['==', ['get', 'permitted'], true]],
+			permittedColor,
+			['all', ['has', 'paid'], ['==', ['get', 'paid'], true]],
+			paidColor,
+			defaultColor
+		];
+
 	const parkingExpression = $derived.by(() => {
 		const { paid, permitted, accessible, loadingZone } = filters;
 
-		let nestedCondition = [
-			'case',
-			[
-				'all',
-				['has', 'permitted'],
-				['==', ['get', 'permitted'], true],
-				['has', 'paid'],
-				['==', ['get', 'paid'], true]
-			],
+		let nestedCondition = generateNestedCondition(
 			colors.parkingAllowedPermittedPaid,
-			['all', ['has', 'permitted'], ['==', ['get', 'permitted'], true]],
 			colors.parkingAllowedPermitted,
-			['all', ['has', 'paid'], ['==', ['get', 'paid'], true]],
 			colors.parkingAllowedPaid,
 			colors.parkingAllowed
-		];
-		let nestedConditionLightened = [
-			'case',
-			[
-				'all',
-				['has', 'permitted'],
-				['==', ['get', 'permitted'], true],
-				['has', 'paid'],
-				['==', ['get', 'paid'], true]
-			],
+		);
+
+		let nestedConditionLightened = generateNestedCondition(
 			colors.parkingAllowedPermittedPaidLight,
-			['all', ['has', 'permitted'], ['==', ['get', 'permitted'], true]],
 			colors.parkingAllowedPermittedLight,
-			['all', ['has', 'paid'], ['==', ['get', 'paid'], true]],
 			colors.parkingAllowedPaidLight,
 			colors.parkingAllowedLight
-		];
+		);
 
 		let fallback = colors.parkingNotAllowed;
 
@@ -494,7 +492,7 @@
 			layout: curbLayout,
 			paint: {
 				'line-color': colors.highlightColorStroke,
-				'line-width': 8
+				'line-width': widths.selectedCurbZoneStroke
 			}
 		};
 
@@ -521,7 +519,7 @@
 			layout: curbLayout,
 			paint: {
 				'line-color': colors.highlightColor,
-				'line-width': 4
+				'line-width': widths.selectedCurbZoneWidth
 			}
 		};
 
@@ -663,7 +661,7 @@
 					layout: curbLayout,
 					paint: {
 						'line-color': parkingExpression,
-						'line-width': 5
+						'line-width': widths.curbZoneWidth
 					}
 				};
 
@@ -677,7 +675,7 @@
 					layout: curbLayout,
 					paint: {
 						'line-color': parkingEmphasisOutlineExpression,
-						'line-width': 12
+						'line-width': widths.curbZoneEmphasisOutline
 					}
 				};
 
@@ -692,7 +690,7 @@
 					layout: curbLayout,
 					paint: {
 						'line-color': parkingEmphasisExpression,
-						'line-width': 8
+						'line-width': widths.curbZoneEmphasisWidth
 					}
 				};
 
@@ -783,7 +781,7 @@
 					layout: {},
 					paint: {
 						'line-color': '#58585b',
-						'line-width': 2,
+						'line-width': widths.areaSelectionOutline,
 						'line-dasharray': [2, 2]
 					}
 				};
@@ -825,7 +823,7 @@
 						layout: {},
 						paint: {
 							'line-color': '#58585b',
-							'line-width': 2,
+							'line-width': widths.areaSelectionOutline,
 							'line-dasharray': [2, 2]
 						}
 					};

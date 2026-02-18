@@ -113,6 +113,16 @@ export const timeOptions = [
 	{ label: '12:00 AM', value: 24, hide: true }
 ];
 
+export const widths = {
+	curbZoneWidth: 5,
+	unavailableCurbZoneWidth: 3,
+	selectedCurbZoneStroke: 8,
+	selectedCurbZoneWidth: 4,
+	curbZoneEmphasisOutline: 12,
+	curbZoneEmphasisWidth: 8,
+	areaSelectionOutline: 2
+};
+
 export const colors = {
 	parkingAllowed: '#51ACFF', // Support blue 1
 	parkingAllowedPermitted: '#216CFF', // Darkened upport blue 1
