@@ -52,11 +52,11 @@
 	let timeSlotWidth = $state(0);
 
 	const calculateWidth = (numEvents) => {
-		return timeSlotWidth / numEvents;
+		return timeSlotWidth / numEvents - 1;
 	};
 
 	const calculateHorizontalOffset = (numEvents, i) => {
-		let width = calculateWidth(numEvents);
+		let width = calculateWidth(numEvents) + 1;
 		return width * i;
 	};
 
