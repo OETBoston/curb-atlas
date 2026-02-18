@@ -134,5 +134,6 @@ export const colors = {
 	accessibleIconFill: 'hsl(197, 71%, 73%)',
 	accessibleIconStroke: 'hsl(0, 0%, 20%)',
 	highlightColor: '#FFEE00', // Vivid Yellow
+	hoverHighlightColor: '#FFEE00', // Vivid Yellow
 	highlightColorStroke: '#000000' // Black
 };

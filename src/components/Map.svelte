@@ -36,6 +36,8 @@
 
 	let marker = $state(null);
 
+	let hoveredCurbId = $state(null);
+
 	const curbLayout = {
 		'line-join': 'round',
 		'line-cap': 'round'
@@ -135,7 +137,14 @@
 			fallback = colors.parkingNotAllowedLight;
 		}
 
-		return ['case', condition, nestedCondition, fallback];
+		return [
+			'case',
+			['boolean', ['feature-state', 'hover'], false],
+			colors.hoverHighlightColor,
+			condition,
+			nestedCondition,
+			fallback
+		];
 	});
 
 	const parkingEmphasisOutlineExpression = $derived.by(() => {
@@ -204,7 +213,12 @@
 			];
 		}
 
-		return condition;
+		return [
+			'case',
+			['boolean', ['feature-state', 'hover'], false],
+			colors.hoverHighlightColor,
+			condition
+		];
 	});
 
 	const parkingSymbolExpression = $derived.by(() => {
@@ -460,6 +474,25 @@
 		}
 	};
 
+	const addHoverState = (layerId, sourceId) => {
+		mapState.map.on('mouseenter', layerId, (e) => {
+			if (e.features.length > 0) {
+				if (hoveredCurbId !== null) {
+					mapState.map.setFeatureState({ source: sourceId, id: hoveredCurbId }, { hover: false });
+				}
+				hoveredCurbId = e.features[0].id;
+				mapState.map.setFeatureState({ source: sourceId, id: hoveredCurbId }, { hover: true });
+			}
+		});
+
+		mapState.map.on('mouseleave', layerId, () => {
+			if (hoveredCurbId !== null) {
+				mapState.map.setFeatureState({ source: sourceId, id: hoveredCurbId }, { hover: false });
+			}
+			hoveredCurbId = null;
+		});
+	};
+
 	const addCurbZonesLayers = async (type, day, time) => {
 		let fetchFn = null;
 
@@ -533,7 +566,8 @@
 
 			const nextSource = {
 				type: 'geojson',
-				data: nextData
+				data: nextData,
+				generateId: true
 			};
 
 			const existingSource = mapState.map.getSource(CURB_ZONES_SOURCE_ID);
@@ -584,6 +618,8 @@
 				};
 
 				mapState.map.addLayer(emphasisLayer);
+
+				addHoverState(CURB_ZONES_EMPHASIS_LAYER_ID, CURB_ZONES_SOURCE_ID);
 
 				const symbolLayer = {
 					id: CURB_ZONES_SYMBOL_LAYER_ID,
