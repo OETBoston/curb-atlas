@@ -1,4 +1,5 @@
 <script>
+	import { onMount } from 'svelte';
 	import { calendarizePolicies } from '../utils/calendarize-policies';
 	import { timeState } from '../state.svelte';
 	import Dropdown from './Dropdown.svelte';
@@ -6,8 +7,8 @@
 
 	const { policies, setHighlightedPolicyId } = $props();
 
-	const MIN_TIME = 9;
-	const MAX_TIME = 17;
+	const MIN_TIME = 0;
+	const MAX_TIME = 24;
 
 	const calendarized = $derived(calendarizePolicies(policies));
 
@@ -81,6 +82,14 @@
 		});
 		return nextTimeOptions;
 	});
+
+	$effect(() => {
+		// Scroll to 9-5 to start
+		if (policies) {
+			const nineAmEl = document.getElementById('9:00 AM');
+			nineAmEl.scrollIntoView();
+		}
+	});
 </script>
 
 <div class="Calendar">
@@ -95,6 +104,7 @@
 				<div class="time-sidebar">
 					{#each nineToFiveTimeOptions as time}
 						<div
+							id={`${time.label}`}
 							class={['time', { hide: time?.hide || Math.round(time.value) !== time.value }]}
 							bind:clientHeight={timeSlotHeight}
 						>
@@ -141,6 +151,8 @@
 
 	.calendar-container {
 		display: flex;
+		max-height: 306px;
+		overflow: auto;
 
 		&-inner {
 			height: 100%;
