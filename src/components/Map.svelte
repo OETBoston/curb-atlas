@@ -275,13 +275,18 @@
 		const { accessible, loadingZone } = filters;
 		let condition = 'transparent';
 
-		return generateOuterNestedCondition(
-			loadingZone,
-			accessible,
-			colors.loading,
-			colors.accessible,
-			condition
-		);
+		return [
+			'case',
+			['boolean', ['feature-state', 'hover'], false],
+			colors.hoverHighlightColor,
+			generateOuterNestedCondition(
+				loadingZone,
+				accessible,
+				colors.loading,
+				colors.accessible,
+				condition
+			)
+		];
 	});
 
 	const parkingSymbolExpression = $derived.by(() => {
