@@ -3,7 +3,7 @@
 	import throttle from 'lodash.throttle';
 	import mapboxgl from 'mapbox-gl';
 	import 'mapbox-gl/dist/mapbox-gl.css';
-	import { mapboxAccessToken, maxBounds, colors, CURB_ZONE_MINZOOM, TIMEOUT } from '../constants';
+	import { mapboxAccessToken, maxBounds, dasharrays, widths, colors, CURB_ZONE_MINZOOM, TIMEOUT } from '../constants';
 	import { simplifyFilters } from '../utils/basic-utils';
 	import {
 		geocoderState,
@@ -117,10 +117,7 @@
 
 	const filters = $derived(simplifyFilters(filterState.current));
 
-	const parkingExpression = $derived.by(() => {
-		const { paid, permitted, accessible, loadingZone } = filters;
-
-		let nestedCondition = [
+	const generateNestedCondition = (bothResult, permittedResult, paidResult, defaultResult) => [
 			'case',
 			[
 				'all',
@@ -129,83 +126,126 @@
 				['has', 'paid'],
 				['==', ['get', 'paid'], true]
 			],
-			colors.parkingAllowedPermittedPaid,
+			bothResult,
 			['all', ['has', 'permitted'], ['==', ['get', 'permitted'], true]],
-			colors.parkingAllowedPermitted,
+			permittedResult,
 			['all', ['has', 'paid'], ['==', ['get', 'paid'], true]],
-			colors.parkingAllowedPaid,
-			colors.parkingAllowed
-		];
-		let nestedConditionLightened = [
-			'case',
-			[
-				'all',
-				['has', 'permitted'],
-				['==', ['get', 'permitted'], true],
-				['has', 'paid'],
-				['==', ['get', 'paid'], true]
-			],
-			colors.parkingAllowedPermittedPaidLight,
-			['all', ['has', 'permitted'], ['==', ['get', 'permitted'], true]],
-			colors.parkingAllowedPermittedLight,
-			['all', ['has', 'paid'], ['==', ['get', 'paid'], true]],
-			colors.parkingAllowedPaidLight,
-			colors.parkingAllowedLight
+			paidResult,
+			defaultResult
 		];
 
-		let fallback = colors.parkingNotAllowed;
+	const generateOuterNestedCondition = (isLoadingZone, isAccessible, loadingResult, accessibleResult, nestedCondition) => {
+		// If both, accessible gets priority
+		if (isLoadingZone && isAccessible) {
+			return [
+				'case',
+				['to-boolean', ['get', 'accessible']],
+				accessibleResult,
+				['to-boolean', ['get', 'loadingZone']],
+				loadingResult,
+				nestedCondition
+			];
+		} else if (isAccessible) {
+			return [
+				'case',
+				['to-boolean', ['get', 'accessible']],
+				accessibleResult,
+				nestedCondition
+			];
+		} else if (isLoadingZone) {
+			return [
+				'case',
+				['to-boolean', ['get', 'loadingZone']],
+				loadingResult,
+				nestedCondition
+			];
+		} else {
+			return nestedCondition;
+		}
+	};
 
-		let condition = [
-			'all',
-			['to-boolean', ['get', 'canPark']],
-			['!', ['to-boolean', ['get', 'permitted']]],
-			['!', ['to-boolean', ['get', 'paid']]]
-		];
-
+	const generateCanParkCondition = (permitted, paid) => {
 		if (permitted && paid) {
-			condition = ['to-boolean', ['get', 'canPark']];
+			return ['to-boolean', ['get', 'canPark']];
 		} else if (permitted) {
-			condition = [
+			return [
 				'all',
 				['to-boolean', ['get', 'canPark']],
 				['!', ['to-boolean', ['get', 'paid']]]
 			];
 		} else if (paid) {
-			condition = [
+			return [
 				'all',
 				['to-boolean', ['get', 'canPark']],
 				['!', ['to-boolean', ['get', 'permitted']]]
 			];
+		} else {
+			return [
+				'all',
+				['to-boolean', ['get', 'canPark']],
+				['!', ['to-boolean', ['get', 'permitted']]],
+				['!', ['to-boolean', ['get', 'paid']]]
+			];
 		}
+	};
 
-		// If both, accessible gets priority
-		if (loadingZone && accessible) {
-			nestedCondition = [
-				'case',
-				['to-boolean', ['get', 'accessible']],
-				colors.accessible,
-				['to-boolean', ['get', 'loadingZone']],
+	const parkingLineWidthExpression = $derived.by(() => {
+		const { paid, permitted } = filters;
+
+		let condition = generateCanParkCondition(permitted, paid);
+
+		return [
+			'case',
+			condition,
+			widths.curbZoneWidth,
+			widths.notAllowedCurbZoneWidth
+		];
+	});
+
+	const parkingLineDasharrayExpression = $derived.by(() => {
+		const { paid, permitted } = filters;
+
+		let condition = generateCanParkCondition(permitted, paid);
+
+		return [
+			'case',
+			condition,
+			dasharrays.curbZoneDasharray, // solid line
+			dasharrays.notAllowedCurbZoneDasharray // dotted line
+		];
+	});
+
+	const parkingLineColorExpression = $derived.by(() => {
+		const { paid, permitted, accessible, loadingZone } = filters;
+
+		let nestedCondition = generateNestedCondition(
+			colors.parkingAllowedPermittedPaid,
+			colors.parkingAllowedPermitted,
+			colors.parkingAllowedPaid,
+			colors.parkingAllowed
+		);
+
+		let nestedConditionLightened = generateNestedCondition(
+			colors.parkingAllowedPermittedPaidLight,
+			colors.parkingAllowedPermittedLight,
+			colors.parkingAllowedPaidLight,
+			colors.parkingAllowedLight
+		);
+
+		let fallback = colors.parkingNotAllowed;
+
+		let condition = generateCanParkCondition(permitted, paid);
+
+		if (loadingZone || accessible) {
+			nestedCondition = generateOuterNestedCondition(
+				loadingZone,
+				accessible,
 				colors.loading,
-				nestedConditionLightened
-			];
-			fallback = colors.parkingNotAllowedLight;
-		} else if (accessible) {
-			nestedCondition = [
-				'case',
-				['to-boolean', ['get', 'accessible']],
 				colors.accessible,
 				nestedConditionLightened
-			];
+			);
 			fallback = colors.parkingNotAllowedLight;
-		} else if (loadingZone) {
-			nestedCondition = [
-				'case',
-				['to-boolean', ['get', 'loadingZone']],
-				colors.loading,
-				nestedConditionLightened
-			];
-			fallback = colors.parkingNotAllowedLight;
-		}
+		}	
 
 		return [
 			'case',
@@ -218,81 +258,39 @@
 	});
 
 	const parkingEmphasisOutlineExpression = $derived.by(() => {
-		const { permitted, accessible, loadingZone } = filters;
-		let nestedConditionLightened = 'transparent';
-		let condition = nestedConditionLightened;
+		const { accessible, loadingZone } = filters;
+		let condition = 'transparent';
 		let outlineColor = '#ffffff';
 
-		// If both, accessible gets priority
-		if (loadingZone && accessible) {
-			condition = [
-				'case',
-				['to-boolean', ['get', 'accessible']],
-				outlineColor,
-				['to-boolean', ['get', 'loadingZone']],
-				outlineColor,
-				nestedConditionLightened
-			];
-		} else if (accessible) {
-			condition = [
-				'case',
-				['to-boolean', ['get', 'accessible']],
-				outlineColor,
-				nestedConditionLightened
-			];
-		} else if (loadingZone) {
-			condition = [
-				'case',
-				['to-boolean', ['get', 'loadingZone']],
-				outlineColor,
-				nestedConditionLightened
-			];
-		}
-
-		return condition;
+		return generateOuterNestedCondition(
+			loadingZone,
+			accessible,
+			outlineColor,
+			outlineColor,
+			condition
+		);
 	});
 
 	const parkingEmphasisExpression = $derived.by(() => {
-		const { permitted, accessible, loadingZone } = filters;
-		let nestedConditionLightened = 'transparent';
-		let condition = nestedConditionLightened;
-
-		// If both, accessible gets priority
-		if (loadingZone && accessible) {
-			condition = [
-				'case',
-				['to-boolean', ['get', 'accessible']],
-				colors.accessible,
-				['to-boolean', ['get', 'loadingZone']],
-				colors.loading,
-				nestedConditionLightened
-			];
-		} else if (accessible) {
-			condition = [
-				'case',
-				['to-boolean', ['get', 'accessible']],
-				colors.accessible,
-				nestedConditionLightened
-			];
-		} else if (loadingZone) {
-			condition = [
-				'case',
-				['to-boolean', ['get', 'loadingZone']],
-				colors.loading,
-				nestedConditionLightened
-			];
-		}
+		const { accessible, loadingZone } = filters;
+		let condition = 'transparent';
 
 		return [
 			'case',
 			['boolean', ['feature-state', 'hover'], false],
 			colors.hoverHighlightColor,
-			condition
+			generateOuterNestedCondition(
+				loadingZone,
+				accessible,
+				colors.loading,
+				colors.accessible,
+				condition
+			)
 		];
 	});
 
 	const parkingSymbolExpression = $derived.by(() => {
-		const { permitted, accessible, loadingZone } = filters;
+		const { accessible, loadingZone } = filters;
 		let condition = 'none'; // default no symbol
 
 		// If both, accessible gets priority
@@ -349,7 +347,7 @@
 	});
 
 	const parkingSymbolFilter = $derived.by(() => {
-		const { permitted, accessible, loadingZone } = filters;
+		const { accessible, loadingZone } = filters;
 		let condition = false;
 
 		if (loadingZone && accessible) {
@@ -494,7 +492,7 @@
 			layout: curbLayout,
 			paint: {
 				'line-color': colors.highlightColorStroke,
-				'line-width': 8
+				'line-width': widths.selectedCurbZoneStroke
 			}
 		};
 
@@ -521,7 +519,7 @@
 			layout: curbLayout,
 			paint: {
 				'line-color': colors.highlightColor,
-				'line-width': 4
+				'line-width': widths.selectedCurbZoneWidth
 			}
 		};
 
@@ -662,8 +660,9 @@
 					filter: curbFilter,
 					layout: curbLayout,
 					paint: {
-						'line-color': parkingExpression,
-						'line-width': 5
+						'line-color': parkingLineColorExpression,
+						'line-width': parkingLineWidthExpression,
+						'line-dasharray': parkingLineDasharrayExpression,
 					}
 				};
 
@@ -677,7 +676,7 @@
 					layout: curbLayout,
 					paint: {
 						'line-color': parkingEmphasisOutlineExpression,
-						'line-width': 12
+						'line-width': widths.curbZoneEmphasisOutline
 					}
 				};
 
@@ -692,7 +691,7 @@
 					layout: curbLayout,
 					paint: {
 						'line-color': parkingEmphasisExpression,
-						'line-width': 8
+						'line-width': widths.curbZoneEmphasisWidth
 					}
 				};
 
@@ -783,8 +782,8 @@
 					layout: {},
 					paint: {
 						'line-color': '#58585b',
-						'line-width': 2,
-						'line-dasharray': [2, 2]
+						'line-width': widths.areaSelectionOutline,
+						'line-dasharray': dasharrays.areaSelectionDasharray
 					}
 				};
 
@@ -825,7 +824,7 @@
 						layout: {},
 						paint: {
 							'line-color': '#58585b',
-							'line-width': 2,
+							'line-width': widths.areaSelectionOutline,
 							'line-dasharray': [2, 2]
 						}
 					};
@@ -860,7 +859,9 @@
 	// filters
 	$effect(() => {
 		if (filters && mapState.map.getLayer(CURB_ZONES_LAYER_ID)) {
-			mapState.map.setPaintProperty(CURB_ZONES_LAYER_ID, 'line-color', parkingExpression);
+			mapState.map.setPaintProperty(CURB_ZONES_LAYER_ID, 'line-color', parkingLineColorExpression);
+			mapState.map.setPaintProperty(CURB_ZONES_LAYER_ID, 'line-width', parkingLineWidthExpression);
+			mapState.map.setPaintProperty(CURB_ZONES_LAYER_ID, 'line-dasharray', parkingLineDasharrayExpression);
 		}
 		if (filters && mapState.map.getLayer(CURB_ZONES_EMPHASIS_OUTLINE_LAYER_ID)) {
 			mapState.map.setPaintProperty(
