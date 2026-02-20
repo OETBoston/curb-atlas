@@ -2,6 +2,7 @@
 	import '../styles/global.scss';
 	import { onMount, untrack } from 'svelte';
 	import Frame from './Frame.svelte';
+	import BetaBanner from './BetaBanner.svelte';
 	import { encodeHash, decodeHash } from '../utils/hash';
 	import {
 		selectedAreaState,
@@ -94,6 +95,7 @@
 <div class="App">
 	<!-- This lets us set state before anything else happens -->
 	{#if mounted}
+		<BetaBanner />
 		<Frame />
 	{/if}
 </div>

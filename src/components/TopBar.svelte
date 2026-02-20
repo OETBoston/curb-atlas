@@ -5,7 +5,7 @@
 </script>
 
 <div class="TopBar">
-	<div class="boston-app-title">Boston Curb Map (Beta)</div>
+	<div class="boston-app-title">Boston Curb Map </div>
 	<div class="right-container">
 		<button class="info-button" onclick={onClickInfo}>info</button>
 		<div class="boston-logo">
@@ -16,7 +16,7 @@
 
 <style lang="scss">
 	.TopBar {
-		padding: 1rem;
+		padding: 0.5rem 1rem;
 		background-color: var(--charles-blue);
 		display: flex;
 		justify-content: space-between;
