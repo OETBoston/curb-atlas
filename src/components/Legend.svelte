@@ -6,6 +6,7 @@
 	import NoParkingLight from '../icons/legend/NoParkingLight.svelte';
 	import YesParking from '../icons/legend/YesParking.svelte';
 	import YesParkingLight from '../icons/legend/YesParkingLight.svelte';
+	import UnusableImage from '../icons/legend/UnusableImage.svelte';
 	import { simplifyFilters } from '../utils/basic-utils';
 
 	const filterValues = $derived(simplifyFilters(filterState.current));
@@ -56,6 +57,12 @@
 			</div>
 		</div>
 	{/if}
+	<div class="legend-item">
+		<div class="legend-text">Unusable Image:</div>
+		<div class="legend-icon">
+			<UnusableImage />
+		</div>
+	</div>
 </div>
 
 <style lang="scss">

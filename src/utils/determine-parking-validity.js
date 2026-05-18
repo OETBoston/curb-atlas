@@ -12,6 +12,7 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 		permitted: false,
 		accessible: false,
 		loadingZone: false,
+		unusableImage: false,
 		// maxStay in minutes
 		maxStay: null,
 		paid: false
@@ -138,6 +139,12 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 					// Check for loading zone
 					if (activity === 'loading' && validDayOfWeek && validTime) {
 						properties.loadingZone = true;
+					}
+
+					// Check for unusable image
+					if (activity === 'unusable image' ) {
+						console.log(("Got Unusable"))
+						properties.unusableImage = true;
 					}
 				}
 			}

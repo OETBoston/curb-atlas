@@ -196,6 +196,8 @@
 
 		return [
 			'case',
+			['to-boolean', ['get', 'unusableImage']],
+			widths.unusableCurbZoneWidth,
 			condition,
 			widths.curbZoneWidth,
 			widths.notAllowedCurbZoneWidth
@@ -209,6 +211,8 @@
 
 		return [
 			'case',
+			['to-boolean', ['get', 'unusableImage']],
+			dasharrays.unusableImageDasharray, // red dashed line
 			condition,
 			dasharrays.curbZoneDasharray, // solid line
 			dasharrays.notAllowedCurbZoneDasharray // dotted line
@@ -249,6 +253,8 @@
 
 		return [
 			'case',
+			['to-boolean', ['get', 'unusableImage']],
+			colors.unusableImage,
 			['boolean', ['feature-state', 'hover'], false],
 			colors.hoverHighlightColor,
 			condition,

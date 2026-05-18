@@ -117,11 +117,13 @@ export const dasharrays = {
 	curbZoneDasharray: [1, 0], // solid line
 	notAllowedCurbZoneDasharray: [0.5, 2], // dotted line
 	areaSelectionDasharray: [2, 2],
+	unusableImageDasharray: [0.5, 2], // red dashed line
 };
 
 export const widths = {
 	curbZoneWidth: 5,
 	notAllowedCurbZoneWidth: 3,
+	unusableCurbZoneWidth: 3,
 	selectedCurbZoneStroke: 8,
 	selectedCurbZoneWidth: 4,
 	curbZoneEmphasisOutline: 12,
@@ -147,6 +149,7 @@ export const colors = {
 	//parkingNotAllowedLight: '#fcd9c0', //'#f9b685',
 	loading: '#e22214',
 	accessible: '#1871BD', // Optimistic Blue
+	unusableImage: '#a5a3a3', // Red
 	loadingIconFill: 'hsl(359, 95%, 75%)',
 	loadingIconStroke: 'hsl(0, 0%, 20%)',
 	accessibleIconFill: 'hsl(197, 71%, 73%)',
