@@ -722,20 +722,26 @@
 
 				mapState.map.addLayer(symbolLayer);
 
-				mapState.map.on('click', CURB_ZONES_LAYER_ID, (e) => {
+				const onCurbZoneClick = (e) => {
 					if (!e.features?.length) return;
-					const feature = e.features[0];
+					const zoneId = e.features[0]?.properties?.curb_zone_id;
+					if (!zoneId) return;
 					// Query the source because we want to pass the non-cropped geometries to selected segment
 					const selectionFeatures = mapState.map.querySourceFeatures(CURB_ZONES_SOURCE_ID, {
 						filter: [
 							'all',
 							['any', ['==', 'selectionOnly', true], ['==', 'innerLine', true]],
-							['==', 'curb_zone_id', feature?.properties?.curb_zone_id]
+							['==', 'curb_zone_id', zoneId]
 						]
 					});
 
-					selectCurbZoneSegment(selectionFeatures[0]);
-				});
+					if (selectionFeatures[0]) selectCurbZoneSegment(selectionFeatures[0]);
+				};
+				// Bind the click handler to both the visible 3-5 px line layer and the
+				// 12 px emphasis-outline layer above it, so users don't have to pixel-
+				// hunt to select a segment.
+				mapState.map.on('click', CURB_ZONES_LAYER_ID, onCurbZoneClick);
+				mapState.map.on('click', CURB_ZONES_EMPHASIS_OUTLINE_LAYER_ID, onCurbZoneClick);
 			} else {
 				existingSource.setData(nextData);
 			}
