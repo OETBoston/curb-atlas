@@ -18,6 +18,14 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 		paid: false
 	};
 
+	// Time-limited "no parking" / "no stopping" rules ("Tue 12pm-4pm")
+	// implicitly allow parking outside their window. The main loop below only
+	// flips canPark via positive "parking" rules, so a zone whose only policy
+	// is a time-limited restriction would always show as red. Track whether
+	// any restriction is firing right now; if none is, fall back to allowed.
+	let hasTimeLimitedRestriction = false;
+	let restrictionActiveNow = false;
+
 	// Sort by priority order
 	const sortedPolicies = policies.sort((a, b) => a.priority - b.priority);
 
@@ -121,6 +129,17 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 						time >= time_of_day_start &&
 						time <= time_of_day_end;
 
+					if (activity === 'no parking' || activity === 'no stopping') {
+						// Treat day/time as "always" when the field is null/equal.
+						const dayApplies = !days_of_week || days_of_week.includes(day);
+						const timeApplies =
+							time_of_day_start === null ||
+							time_of_day_start === time_of_day_end ||
+							(time >= time_of_day_start && time <= time_of_day_end);
+						hasTimeLimitedRestriction = true;
+						if (dayApplies && timeApplies) restrictionActiveNow = true;
+					}
+
 					// Check for days of week
 					// If parking is allowed and the "no parking" policy is not applied, skip
 					if (properties.canPark && days_of_week) {
@@ -146,25 +165,35 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 		}
 	}
 
+	// Permissive default: if the zone's only regulations are time-limited
+	// restrictions and none of them apply at the selected day/time, parking
+	// is allowed. Without this, "No Parking Tue 12-4" zones render red on
+	// every other day/time. Runs before the unusable-image check below so
+	// we don't both flag the zone as "unknown" and allow parking.
+	if (!properties.canPark && hasTimeLimitedRestriction && !restrictionActiveNow) {
+		properties.canPark = true;
+	}
+
 	// Only mark unusable if we couldn't determine any parking policy
 	if (!properties.canPark && !properties.loadingZone) {
-	    const hasKnownPolicy = policies.some(policy =>
-	        (policy?.rules ?? []).some(rule => 
-	            rule?.activity && rule.activity !== 'unusable image'
-	        )
-	    );
-	    if (!hasKnownPolicy) {
-	        const hasUnusableImage = policies.some(policy =>
-	            (policy?.rules ?? []).some(rule => rule?.activity === 'unusable image')
-	        );
-	        properties.unusableImage = hasUnusableImage;
-	    }
-	}
-		if (properties.maxStay === null) {
-			delete properties.maxStay;
+		const hasKnownPolicy = policies.some((policy) =>
+			(policy?.rules ?? []).some(
+				(rule) => rule?.activity && rule.activity !== 'unusable image'
+			)
+		);
+		if (!hasKnownPolicy) {
+			const hasUnusableImage = policies.some((policy) =>
+				(policy?.rules ?? []).some((rule) => rule?.activity === 'unusable image')
+			);
+			properties.unusableImage = hasUnusableImage;
 		}
+	}
 
-		return { ...zoneProperties, ...properties };
-	};
+	if (properties.maxStay === null) {
+		delete properties.maxStay;
+	}
+
+	return { ...zoneProperties, ...properties };
+};
 
 export { determineParkingValidity };
