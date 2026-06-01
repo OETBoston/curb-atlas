@@ -7,8 +7,8 @@
 </div>
 
 <svelte:head>
-	<title>Boston Curb Atlas - Chinatown Preview</title>
-	<meta name="description" content="Boston Curb Atlas - Chinatown Preview" />
+	<title>Boston Curb Map (BETA)</title>
+	<meta name="description" content="Boston Curb Map (BETA) — curb regulations across Boston" />
 </svelte:head>
 
 <style>

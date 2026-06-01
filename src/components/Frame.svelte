@@ -98,7 +98,7 @@
 				<button class="info-modal-backdrop" onclick={() => (infoModalOpen = false)}></button>
 				<div class="info-modal" role="dialog">
 					<button class="close-button" onclick={() => (infoModalOpen = false)}><Close /></button>
-					<div class="info-modal-title">Chinatown Curb Map Demo</div>
+					<div class="info-modal-title">Boston Curb Map (BETA)</div>
 					<div class="info-modal-body">
 						<p>
 							The data you see may be incomplete, outdated, or inaccurate. <strong
