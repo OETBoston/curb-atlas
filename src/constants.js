@@ -117,7 +117,7 @@ export const dasharrays = {
 	curbZoneDasharray: [1, 0], // solid line
 	notAllowedCurbZoneDasharray: [0.5, 2], // dotted line
 	areaSelectionDasharray: [2, 2],
-	unusableImageDasharray: [0.5, 2], // red dashed line
+	unusableImageDasharray: [0.5, 2], // gray dashed line
 };
 
 export const widths = {
@@ -142,14 +142,11 @@ export const colors = {
 	parkingAllowedPaidLight: '#699eff', // Currently same as permitted
 	// Unsure if we want to combine
 	parkingAllowedPermittedPaidLight: '#699eff', // Currently same as permitted
-	//freedomTrailRed: '#FB4D42', //<- Freedom Trail Red
-	parkingNotAllowed: '#f58433',
-	parkingNotAllowedLight: '#f9b685',
-	//parkingNotAllowed: '#f9b685', //'#f58433',
-	//parkingNotAllowedLight: '#fcd9c0', //'#f9b685',
+	parkingNotAllowed: '#FB4D42', // Freedom Trail Red
+	parkingNotAllowedLight: '#fda398', // lightened Freedom Trail Red
 	loading: '#e22214',
 	accessible: '#1871BD', // Optimistic Blue
-	unusableImage: '#a5a3a3', // Red
+	unusableImage: '#a5a3a3', // gray (color comment was wrong)
 	loadingIconFill: 'hsl(359, 95%, 75%)',
 	loadingIconStroke: 'hsl(0, 0%, 20%)',
 	accessibleIconFill: 'hsl(197, 71%, 73%)',
