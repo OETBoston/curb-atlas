@@ -141,21 +141,30 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 						properties.loadingZone = true;
 					}
 
-					// Check for unusable image
-					if (activity === 'unusable image' ) {
-						console.log(("Got Unusable"))
-						properties.unusableImage = true;
-					}
 				}
 			}
 		}
 	}
 
-	if (properties.maxStay === null) {
-		delete properties.maxStay;
+	// Only mark unusable if we couldn't determine any parking policy
+	if (!properties.canPark && !properties.loadingZone) {
+	    const hasKnownPolicy = policies.some(policy =>
+	        (policy?.rules ?? []).some(rule => 
+	            rule?.activity && rule.activity !== 'unusable image'
+	        )
+	    );
+	    if (!hasKnownPolicy) {
+	        const hasUnusableImage = policies.some(policy =>
+	            (policy?.rules ?? []).some(rule => rule?.activity === 'unusable image')
+	        );
+	        properties.unusableImage = hasUnusableImage;
+	    }
 	}
+		if (properties.maxStay === null) {
+			delete properties.maxStay;
+		}
 
-	return { ...zoneProperties, ...properties };
-};
+		return { ...zoneProperties, ...properties };
+	};
 
 export { determineParkingValidity };

@@ -1,7 +1,7 @@
 {
 	"name": "boston-curb-map",
 	"private": true,
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -11,7 +11,7 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
-		"deploy": "yarn build && node scripts/deploy.js"
+		"deploy": "node scripts/bump-version.js && yarn build && node scripts/deploy.js"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
