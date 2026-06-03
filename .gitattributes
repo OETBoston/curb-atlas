@@ -1,0 +1,10 @@
+# Ignore everything by default using a wildcard pattern
+* export-ignore
+
+# Explicitly un-ignore the dist folder and its specific file
+\!/dist/
+\!/dist/bundle.iife.js
+
+# Ensure config files themselves aren't exported
+.gitattributes export-ignore
+composer.json export-ignore
