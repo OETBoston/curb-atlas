@@ -1,10 +1,19 @@
-# Ignore everything by default using a wildcard pattern
-* export-ignore
+# Ignore all folders except dist
+/scripts/ export-ignore
+/sprites/ export-ignore
+/src/ export-ignore
+/static/ export-ignore
+/styles/ export-ignore
 
-# Explicitly un-ignore the dist folder and its specific file
-\!/dist/
-\!/dist/bundle.iife.js
+# Ignore all root files
+.* export-ignore
+/*.html export-ignore
+/*.js export-ignore
+/*.json export-ignore
+/*.lock export-ignore
+/*.yml export-ignore
+/*.md export-ignore
 
-# Ensure config files themselves aren't exported
-.gitattributes export-ignore
-composer.json export-ignore
+# Keep files and folders
+/composer.json !export-ignore
+/dist/ !export-ignore
