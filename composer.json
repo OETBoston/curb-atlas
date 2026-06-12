@@ -1,6 +1,6 @@
 {
     "name": "oetboston/curb-atlas",
     "description": "City of Boston Curb Mapping and searching application",
-    "type": "library",
+    "type": "drupal-library",
     "license": "MIT"
 }
