@@ -18,12 +18,6 @@ export const initialFilterState = [
 		open: true,
 		options: [
 			{
-				label: 'Include spots requiring residential permits',
-				id: 'permitted',
-				value: false,
-				type: 'checkbox'
-			},
-			{
 				label: 'Include spots requiring payment',
 				id: 'paid',
 				value: false,
@@ -44,6 +38,12 @@ export const initialFilterState = [
 			{
 				label: 'Loading Zones',
 				id: 'loadingZone',
+				value: false,
+				type: 'toggle'
+			},
+			{
+				label: 'Resident Permit Parking',
+				id: 'permitted',
 				value: false,
 				type: 'toggle'
 			}
@@ -156,5 +156,10 @@ export const colors = {
 	accessibleIconStroke: 'hsl(0, 0%, 20%)',
 	highlightColor: '#FFEE00', // Vivid Yellow
 	hoverHighlightColor: '#FFEE00', // Vivid Yellow
-	highlightColorStroke: '#000000' // Black
+	highlightColorStroke: '#000000', // Black
+	permitParking: '#90EE90',
+	permitParkingLight: '#7BC492',
+	permitParkingIconFill: 'hsl(134, 35%, 75%)',
+	permitParkingIconStroke: 'hsl(0, 0%, 20%)',
+	permitParkingOutline: 'transparent',
 };

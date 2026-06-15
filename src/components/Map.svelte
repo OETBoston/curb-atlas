@@ -134,66 +134,99 @@
 			defaultResult
 		];
 
-	const generateOuterNestedCondition = (isLoadingZone, isAccessible, loadingResult, accessibleResult, nestedCondition) => {
-		// If both, accessible gets priority
-		if (isLoadingZone && isAccessible) {
-			return [
-				'case',
-				['to-boolean', ['get', 'accessible']],
-				accessibleResult,
-				['to-boolean', ['get', 'loadingZone']],
-				loadingResult,
-				nestedCondition
-			];
-		} else if (isAccessible) {
-			return [
-				'case',
-				['to-boolean', ['get', 'accessible']],
-				accessibleResult,
-				nestedCondition
-			];
-		} else if (isLoadingZone) {
-			return [
-				'case',
-				['to-boolean', ['get', 'loadingZone']],
-				loadingResult,
-				nestedCondition
-			];
-		} else {
-			return nestedCondition;
-		}
-	};
+	const generateOuterNestedCondition = (isLoadingZone, isAccessible, isPermitted, loadingResult, accessibleResult, permittedResult, nestedCondition) => {
+	if (isLoadingZone && isAccessible && isPermitted) {
+		return [
+			'case',
+			['to-boolean', ['get', 'accessible']],
+			accessibleResult,
+			['to-boolean', ['get', 'loadingZone']],
+			loadingResult,
+			['to-boolean', ['get', 'permitted']],
+			permittedResult,
+			nestedCondition
+		];
+	} else if (isLoadingZone && isAccessible) {
+		return [
+			'case',
+			['to-boolean', ['get', 'accessible']],
+			accessibleResult,
+			['to-boolean', ['get', 'loadingZone']],
+			loadingResult,
+			nestedCondition
+		];
+	} else if (isLoadingZone && isPermitted) {
+		return [
+			'case',
+			['to-boolean', ['get', 'loadingZone']],
+			loadingResult,
+			['to-boolean', ['get', 'permitted']],
+			permittedResult,
+			nestedCondition
+		];
+	} else if (isAccessible && isPermitted) {
+		return [
+			'case',
+			['to-boolean', ['get', 'accessible']],
+			accessibleResult,
+			['to-boolean', ['get', 'permitted']],
+			permittedResult,
+			nestedCondition
+		];
+	} else if (isAccessible) {
+		return [
+			'case',
+			['to-boolean', ['get', 'accessible']],
+			accessibleResult,
+			nestedCondition
+		];
+	} else if (isLoadingZone) {
+		return [
+			'case',
+			['to-boolean', ['get', 'loadingZone']],
+			loadingResult,
+			nestedCondition
+		];
+	} else if (isPermitted) {
+		return [
+			'case',
+			['to-boolean', ['get', 'permitted']],
+			permittedResult,
+			nestedCondition
+		];
+	} else {
+		return nestedCondition;
+	}
+};
 
-	const generateCanParkCondition = (permitted, paid) => {
-		if (permitted && paid) {
-			return ['to-boolean', ['get', 'canPark']];
-		} else if (permitted) {
-			return [
-				'all',
-				['to-boolean', ['get', 'canPark']],
-				['!', ['to-boolean', ['get', 'paid']]]
-			];
-		} else if (paid) {
-			return [
-				'all',
-				['to-boolean', ['get', 'canPark']],
-				['!', ['to-boolean', ['get', 'permitted']]]
-			];
-		} else {
-			return [
-				'all',
-				['to-boolean', ['get', 'canPark']],
-				['!', ['to-boolean', ['get', 'permitted']]],
-				['!', ['to-boolean', ['get', 'paid']]]
-			];
-		}
-	};
+	const generateCanParkCondition = (paid, permitted) => {
+    if (paid && permitted) {
+        return ['to-boolean', ['get', 'canPark']];
+    } else if (paid) {
+        return [
+            'all',
+            ['to-boolean', ['get', 'canPark']],
+            ['!', ['to-boolean', ['get', 'permitted']]]
+        ];
+    } else if (permitted) {
+        return [
+            'all',
+            ['to-boolean', ['get', 'canPark']],
+            ['!', ['to-boolean', ['get', 'paid']]]
+        ];
+    } else {
+        return [
+            'all',
+            ['to-boolean', ['get', 'canPark']],
+            ['!', ['to-boolean', ['get', 'permitted']]],
+            ['!', ['to-boolean', ['get', 'paid']]]
+        ];
+    }
+};
 
 	const parkingLineWidthExpression = $derived.by(() => {
-		const { paid, permitted } = filters;
-
-		let condition = generateCanParkCondition(permitted, paid);
-
+		const { paid } = filters;
+		let condition = generateCanParkCondition(paid);
 		return [
 			'case',
 			['to-boolean', ['get', 'unusableImage']],
@@ -205,21 +238,19 @@
 	});
 
 	const parkingLineDasharrayExpression = $derived.by(() => {
-		const { paid, permitted } = filters;
-
-		let condition = generateCanParkCondition(permitted, paid);
-
+		const { paid } = filters;
+		let condition = generateCanParkCondition(paid);
 		return [
 			'case',
 			['to-boolean', ['get', 'unusableImage']],
-			dasharrays.unusableImageDasharray, // red dashed line
+			dasharrays.unusableImageDasharray,
 			condition,
-			dasharrays.curbZoneDasharray, // solid line
-			dasharrays.notAllowedCurbZoneDasharray // dotted line
+			dasharrays.curbZoneDasharray,
+			dasharrays.notAllowedCurbZoneDasharray
 		];
 	});
 
-	const parkingLineColorExpression = $derived.by(() => {
+		const parkingLineColorExpression = $derived.by(() => {
 		const { paid, permitted, accessible, loadingZone } = filters;
 
 		let nestedCondition = generateNestedCondition(
@@ -237,48 +268,53 @@
 		);
 
 		let fallback = colors.parkingNotAllowed;
+		let condition = generateCanParkCondition(paid);
 
-		let condition = generateCanParkCondition(permitted, paid);
-
-		if (loadingZone || accessible) {
+		if (loadingZone || accessible || permitted) {
 			nestedCondition = generateOuterNestedCondition(
 				loadingZone,
 				accessible,
+				permitted,
 				colors.loading,
 				colors.accessible,
+				colors.permitParking,
 				nestedConditionLightened
 			);
 			fallback = colors.parkingNotAllowedLight;
-		}	
+		}
 
 		return [
-			'case',
-			['to-boolean', ['get', 'unusableImage']],
-			colors.unusableImage,
-			['boolean', ['feature-state', 'hover'], false],
-			colors.hoverHighlightColor,
-			condition,
-			nestedCondition,
-			fallback
+		    'case',
+		    ['to-boolean', ['get', 'unusableImage']],
+		    colors.unusableImage,
+		    ['boolean', ['feature-state', 'hover'], false],
+		    colors.hoverHighlightColor,
+		    condition,
+		    nestedCondition,
+		    ['to-boolean', ['get', 'permitted']],
+		    permitted ? colors.permitParking : fallback,
+		    fallback
 		];
 	});
 
 	const parkingEmphasisOutlineExpression = $derived.by(() => {
-		const { accessible, loadingZone } = filters;
+		const { accessible, loadingZone, permitted } = filters;
 		let condition = 'transparent';
 		let outlineColor = '#ffffff';
 
 		return generateOuterNestedCondition(
 			loadingZone,
 			accessible,
+			permitted,
 			outlineColor,
 			outlineColor,
+			colors.permitParkingOutline,
 			condition
 		);
 	});
 
 	const parkingEmphasisExpression = $derived.by(() => {
-		const { accessible, loadingZone } = filters;
+		const { accessible, loadingZone, permitted } = filters;
 		let condition = 'transparent';
 
 		return [
@@ -288,8 +324,10 @@
 			generateOuterNestedCondition(
 				loadingZone,
 				accessible,
+				permitted,
 				colors.loading,
 				colors.accessible,
+				colors.permitParking,
 				condition
 			)
 		];
@@ -613,6 +651,20 @@
 				return;
 			}
 
+			// Normalize: some features arrive with their data nested inside a
+			// zoneProperties object instead of as flat properties. Mapbox can't
+			// store nested objects (it stringifies them), and our filters match
+			// on flat keys like curb_zone_id — so flatten them here, once,
+			// before anything else uses this data.
+			curbZones.features.forEach((f) => {
+				const zp = f.properties?.zoneProperties;
+				if (zp) {
+					const parsed = typeof zp === 'string' ? JSON.parse(zp) : zp;
+					f.properties = { ...parsed, ...f.properties };
+					delete f.properties.zoneProperties;
+				}
+			});
+
 			// Clipping logic (potentially move to its own discrete function)
 			const selectedArea = JSON.parse(JSON.stringify(selectedAreaState.selected));
 
@@ -710,7 +762,6 @@
 					minzoom: CURB_ZONE_MINZOOM,
 					type: 'symbol',
 					source: CURB_ZONES_SOURCE_ID,
-					filter: curbFilter,
 					filter: parkingSymbolFilter,
 					layout: {
 						'symbol-placement': 'line-center',
@@ -725,16 +776,32 @@
 				mapState.map.on('click', CURB_ZONES_LAYER_ID, (e) => {
 					if (!e.features?.length) return;
 					const feature = e.features[0];
-					// Query the source because we want to pass the non-cropped geometries to selected segment
+
+					// Resolve the curb zone ID, checking both possible places.
+					let curbZoneId = feature.properties?.curb_zone_id;
+
+					// Some features have their data nested inside zoneProperties, which
+					// Mapbox stores as a JSON string. Parse it and read the ID from there.
+					if (curbZoneId == null && feature.properties?.zoneProperties) {
+						const zoneProps = JSON.parse(feature.properties.zoneProperties);
+						curbZoneId = zoneProps.curb_zone_id;
+					}
+
+					// No ID found anywhere — bail out instead of crashing.
+					if (curbZoneId == null) return;
+
+					// Query the source because we want to pass the non-cropped geometries to selectCurbZoneSegment
 					const selectionFeatures = mapState.map.querySourceFeatures(CURB_ZONES_SOURCE_ID, {
 						filter: [
 							'all',
 							['any', ['==', 'selectionOnly', true], ['==', 'innerLine', true]],
-							['==', 'curb_zone_id', feature?.properties?.curb_zone_id]
+							['==', 'curb_zone_id', curbZoneId]
 						]
 					});
 
-					selectCurbZoneSegment(selectionFeatures[0]);
+					if (selectionFeatures.length) {
+						selectCurbZoneSegment(selectionFeatures[0]);
+					}
 				});
 			} else {
 				existingSource.setData(nextData);

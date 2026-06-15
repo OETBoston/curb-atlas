@@ -68,14 +68,15 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 				// POSITIVE
 				// Check for basic parking eligibility
 				if (isParking) {
+					console.log('purposes', purposes);
 					properties.canPark = true;
 					// Check for permitting
 					if (
-						purposes &&
-						Array.isArray(purposes) &&
-						purposes.some((v) => ['permit', 'disabled_parking_permit'].includes(v))
+					    user_classes &&
+					    Array.isArray(user_classes) &&
+					    user_classes.includes('resident_permit')
 					) {
-						properties.permitted = true;
+					    properties.permitted = true;
 					}
 					// Check for user classes
 					if (user_classes) {
@@ -164,6 +165,7 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 			delete properties.maxStay;
 		}
 
+		console.log(properties)
 		return { ...zoneProperties, ...properties };
 	};
 
