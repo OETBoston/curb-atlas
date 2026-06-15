@@ -58,7 +58,7 @@
 		</div>
 	{/if}
 	<div class="legend-item">
-		<div class="legend-text">Unusable Image:</div>
+		<div class="legend-text">Sign could not be read (regulation unknown):</div>
 		<div class="legend-icon">
 			<UnusableImage />
 		</div>

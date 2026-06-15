@@ -7,10 +7,22 @@
 	import length from '@turf/length';
 	import along from '@turf/along';
 
-	const policies = $derived(selectedCurbZoneState.policies);
+	const realPolicies = $derived(selectedCurbZoneState.policies);
 	const geometry = $derived(selectedCurbZoneState.geometry);
 	const properties = $derived(selectedCurbZoneState.properties);
 	let curbZoneId = $derived(properties?.curb_zone_id);
+
+	// When the zone has real policies alongside the unusable-image sentinel,
+	// the sentinel adds no information — hide it so the panel stays clean.
+	// But if the sentinel is the *only* policy (true gray segment, no signs),
+	// keep it so the user sees something instead of an empty list.
+	const policies = $derived.by(() => {
+		if (!realPolicies?.length) return realPolicies;
+		const nonSentinel = realPolicies.filter((p) =>
+			(p.rules || []).some((r) => r?.activity !== 'unusable image')
+		);
+		return nonSentinel.length ? nonSentinel : realPolicies;
+	});
 
 	let activeTab = $state('policies');
 
