@@ -22,7 +22,8 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 	const sortedPolicies = policies.sort((a, b) => a.priority - b.priority);
 
 	for (const policy of sortedPolicies) {
-		let { rules = [], time_spans = [] } = policy ?? {};
+		let { rules = [], time_spans = [], rates = [] } = policy ?? {};
+		const hasPaidRate = Array.isArray(rates) && rates.length > 0;
 
 		rules = Array.isArray(rules) ? rules.filter(Boolean) : [];
 		time_spans = Array.isArray(time_spans) ? time_spans.filter(Boolean) : [];
@@ -34,7 +35,6 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 				user_classes = [],
 				max_stay,
 				max_stay_unit,
-				rate = null
 			} = rule ?? {};
 
 			// Gross data fixing
@@ -110,7 +110,7 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 						properties.maxStay = maxStay;
 					}
 					// Check for paid parking
-					if (properties.canPark && rate) {
+					if (properties.canPark && hasPaidRate) {
 						properties.paid = true;
 					}
 				} // No parking

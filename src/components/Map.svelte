@@ -134,70 +134,15 @@
 			defaultResult
 		];
 
-	const generateOuterNestedCondition = (isLoadingZone, isAccessible, isPermitted, loadingResult, accessibleResult, permittedResult, nestedCondition) => {
-	if (isLoadingZone && isAccessible && isPermitted) {
-		return [
-			'case',
-			['to-boolean', ['get', 'accessible']],
-			accessibleResult,
-			['to-boolean', ['get', 'loadingZone']],
-			loadingResult,
-			['to-boolean', ['get', 'permitted']],
-			permittedResult,
-			nestedCondition
-		];
-	} else if (isLoadingZone && isAccessible) {
-		return [
-			'case',
-			['to-boolean', ['get', 'accessible']],
-			accessibleResult,
-			['to-boolean', ['get', 'loadingZone']],
-			loadingResult,
-			nestedCondition
-		];
-	} else if (isLoadingZone && isPermitted) {
-		return [
-			'case',
-			['to-boolean', ['get', 'loadingZone']],
-			loadingResult,
-			['to-boolean', ['get', 'permitted']],
-			permittedResult,
-			nestedCondition
-		];
-	} else if (isAccessible && isPermitted) {
-		return [
-			'case',
-			['to-boolean', ['get', 'accessible']],
-			accessibleResult,
-			['to-boolean', ['get', 'permitted']],
-			permittedResult,
-			nestedCondition
-		];
-	} else if (isAccessible) {
-		return [
-			'case',
-			['to-boolean', ['get', 'accessible']],
-			accessibleResult,
-			nestedCondition
-		];
-	} else if (isLoadingZone) {
-		return [
-			'case',
-			['to-boolean', ['get', 'loadingZone']],
-			loadingResult,
-			nestedCondition
-		];
-	} else if (isPermitted) {
-		return [
-			'case',
-			['to-boolean', ['get', 'permitted']],
-			permittedResult,
-			nestedCondition
-		];
-	} else {
-		return nestedCondition;
-	}
-};
+	const generateOuterNestedCondition = (isLoadingZone, isAccessible, isPermitted, isPaidZone, loadingResult, accessibleResult, permittedResult, paidResult, nestedCondition) => {
+		const conditions = [];
+		if (isAccessible) conditions.push(['to-boolean', ['get', 'accessible']], accessibleResult);
+		if (isLoadingZone) conditions.push(['to-boolean', ['get', 'loadingZone']], loadingResult);
+		if (isPermitted) conditions.push(['to-boolean', ['get', 'permitted']], permittedResult);
+		if (isPaidZone) conditions.push(['to-boolean', ['get', 'paid']], paidResult);
+		if (conditions.length === 0) return nestedCondition;
+		return ['case', ...conditions, nestedCondition];
+	};
 
 	const generateCanParkCondition = (paid, permitted) => {
     if (paid && permitted) {
@@ -251,7 +196,7 @@
 	});
 
 		const parkingLineColorExpression = $derived.by(() => {
-		const { paid, permitted, accessible, loadingZone } = filters;
+		const { paid, permitted, accessible, loadingZone, paidZone } = filters;
 
 		let nestedCondition = generateNestedCondition(
 			colors.parkingAllowedPermittedPaid,
@@ -270,14 +215,16 @@
 		let fallback = colors.parkingNotAllowed;
 		let condition = generateCanParkCondition(paid);
 
-		if (loadingZone || accessible || permitted) {
+		if (loadingZone || accessible || permitted || paidZone) {
 			nestedCondition = generateOuterNestedCondition(
 				loadingZone,
 				accessible,
 				permitted,
+				paidZone,
 				colors.loading,
 				colors.accessible,
 				colors.permitParking,
+				colors.paidZone,
 				nestedConditionLightened
 			);
 			fallback = colors.parkingNotAllowedLight;
@@ -293,12 +240,14 @@
 		    nestedCondition,
 		    ['to-boolean', ['get', 'permitted']],
 		    permitted ? colors.permitParking : fallback,
+		    ['to-boolean', ['get', 'paid']],
+		    paidZone ? colors.paidZone : fallback,
 		    fallback
 		];
 	});
 
 	const parkingEmphasisOutlineExpression = $derived.by(() => {
-		const { accessible, loadingZone, permitted } = filters;
+		const { accessible, loadingZone, permitted, paidZone } = filters;
 		let condition = 'transparent';
 		let outlineColor = '#ffffff';
 
@@ -306,15 +255,17 @@
 			loadingZone,
 			accessible,
 			permitted,
+			paidZone,
 			outlineColor,
 			outlineColor,
 			colors.permitParkingOutline,
+			colors.paidZoneOutline,
 			condition
 		);
 	});
 
 	const parkingEmphasisExpression = $derived.by(() => {
-		const { accessible, loadingZone, permitted } = filters;
+		const { accessible, loadingZone, permitted, paidZone } = filters;
 		let condition = 'transparent';
 
 		return [
@@ -325,9 +276,11 @@
 				loadingZone,
 				accessible,
 				permitted,
+				paidZone,
 				colors.loading,
 				colors.accessible,
 				colors.permitParking,
+				colors.paidZone,
 				condition
 			)
 		];

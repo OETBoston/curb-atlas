@@ -46,6 +46,12 @@ export const initialFilterState = [
 				id: 'permitted',
 				value: false,
 				type: 'toggle'
+			},
+			{
+				label: 'Paid Parking',
+				id: 'paidZone',
+				value: false,
+				type: 'toggle'
 			}
 		]
 	}
@@ -162,4 +168,7 @@ export const colors = {
 	permitParkingIconFill: 'hsl(134, 35%, 75%)',
 	permitParkingIconStroke: 'hsl(0, 0%, 20%)',
 	permitParkingOutline: 'transparent',
+	paidZone: '#8B5CF6',
+	paidZoneLight: '#A78BFA',
+	paidZoneOutline: 'transparent',
 };
