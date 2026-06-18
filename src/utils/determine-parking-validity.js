@@ -22,7 +22,8 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 	const sortedPolicies = policies.sort((a, b) => a.priority - b.priority);
 
 	for (const policy of sortedPolicies) {
-		let { rules = [], time_spans = [] } = policy ?? {};
+		let { rules = [], time_spans = [], rates = [] } = policy ?? {};
+		const hasPaidRate = Array.isArray(rates) && rates.length > 0;
 
 		rules = Array.isArray(rules) ? rules.filter(Boolean) : [];
 		time_spans = Array.isArray(time_spans) ? time_spans.filter(Boolean) : [];
@@ -34,7 +35,6 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 				user_classes = [],
 				max_stay,
 				max_stay_unit,
-				rate = null
 			} = rule ?? {};
 
 			// Gross data fixing
@@ -68,14 +68,15 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 				// POSITIVE
 				// Check for basic parking eligibility
 				if (isParking) {
+					console.log('purposes', purposes);
 					properties.canPark = true;
 					// Check for permitting
 					if (
-						purposes &&
-						Array.isArray(purposes) &&
-						purposes.some((v) => ['permit', 'disabled_parking_permit'].includes(v))
+					    user_classes &&
+					    Array.isArray(user_classes) &&
+					    user_classes.includes('resident_permit')
 					) {
-						properties.permitted = true;
+					    properties.permitted = true;
 					}
 					// Check for user classes
 					if (user_classes) {
@@ -109,7 +110,7 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 						properties.maxStay = maxStay;
 					}
 					// Check for paid parking
-					if (properties.canPark && rate) {
+					if (properties.canPark && hasPaidRate) {
 						properties.paid = true;
 					}
 				} // No parking
@@ -164,6 +165,7 @@ const determineParkingValidity = async (policies, zoneProperties, day, time) => 
 			delete properties.maxStay;
 		}
 
+		console.log(properties)
 		return { ...zoneProperties, ...properties };
 	};
 

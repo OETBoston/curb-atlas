@@ -55,7 +55,7 @@
 	{#if activeTab === 'policies'}
 		<Policies {policies} {curbZoneId} />
 	{:else}
-		<AdditionalInfo {properties} />
+		<AdditionalInfo {properties} {policies} />
 	{/if}
 </div>
 

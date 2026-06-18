@@ -7,12 +7,16 @@
 	import YesParking from '../icons/legend/YesParking.svelte';
 	import YesParkingLight from '../icons/legend/YesParkingLight.svelte';
 	import UnusableImage from '../icons/legend/UnusableImage.svelte';
+	import YesParkingPermitted from '../icons/legend/YesParkingPermitted.svelte';
+	import YesParkingPaid from '../icons/legend/YesParkingPaid.svelte';
 	import { simplifyFilters } from '../utils/basic-utils';
 
 	const filterValues = $derived(simplifyFilters(filterState.current));
 
 	const hasAccessibility = $derived(filterValues['accessible']);
 	const hasLoadingZones = $derived(filterValues['loadingZone']);
+	const hasPermitted = $derived(filterValues['permitted']);
+	const hasPaidZone = $derived(filterValues['paidZone']);
 </script>
 
 <div class="Legend">
@@ -54,6 +58,22 @@
 			<div class="legend-text">Loading zones:</div>
 			<div class="legend-icon">
 				<LoadingZone />
+			</div>
+		</div>
+	{/if}
+	{#if hasPermitted}
+		<div class="legend-item">
+			<div class="legend-text">Resident permit parking:</div>
+			<div class="legend-icon">
+				<YesParkingPermitted />
+			</div>
+		</div>
+	{/if}
+	{#if hasPaidZone}
+		<div class="legend-item">
+			<div class="legend-text">Paid parking:</div>
+			<div class="legend-icon">
+				<YesParkingPaid />
 			</div>
 		</div>
 	{/if}

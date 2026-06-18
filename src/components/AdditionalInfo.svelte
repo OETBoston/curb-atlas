@@ -1,5 +1,5 @@
 <script>
-	const { properties } = $props();
+	const { properties, policies } = $props();
 
 	const availableParking = $derived(properties?.available ? 'Available' : 'Unavailable');
 	const availableParkingSpaces = $derived(properties?.num_spaces ?? 0);
@@ -60,6 +60,11 @@
 			</li>
 		{/each}
 	</ul>
+
+	<div class="raw-json-section">
+		<div class="raw-json-title">Raw data</div>
+		<pre class="raw-json">{JSON.stringify({ properties, policies }, null, 2)}</pre>
+	</div>
 </div>
 
 <style lang="scss">
@@ -107,5 +112,30 @@
 		li::marker {
 			margin-left: 0;
 		}
+	}
+
+	.raw-json-section {
+		margin-top: 1rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.raw-json-title {
+		font-size: var(--font-size-ms);
+		font-weight: var(--font-weight-bold);
+	}
+
+	.raw-json {
+		font-size: 11px;
+		line-height: 1.4;
+		background: #f4f4f4;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		padding: 0.5rem;
+		overflow: auto;
+		max-height: 400px;
+		white-space: pre;
+		word-break: break-all;
 	}
 </style>
